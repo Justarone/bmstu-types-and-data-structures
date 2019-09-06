@@ -2,6 +2,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+
+// УСТРАНИТЬ ПРОБЛЕМЫ С ИТЕРАЦИЯМИ В ДЕЛЕНИИ (44 / 11 = 10?!)
+
+
 #define MAXLEN 40
 #define OK 0
 #define DIV_ERROR 1
@@ -30,10 +34,9 @@ int parse_raw_data(char *str, big_num *data); // Функция приведен
 int mant_more_eq(const char *const mant1, const char *const mant2); // Функция ">=" для мантисс больших чисел
 int mant_diff(char *const mant1, const char *const mant2); // Функция вычитания мантисс больших чисел
 void move_mant(big_num *var, const int k); // сдвиг мантиссы
-void remove_zeros(big_num *const var); // убирает нули в начале мантиссы
 int is_zero(const char *const var); // проверяет, является ли мантисса числа чистым нулем
 big_num big_division(big_num a, big_num b); // Функция деления больших чисел
-void pretty_print(big_num *data); // Функция печати данных в нужном виде
+void pretty_print(const big_num *const data); // Функция печати данных в нужном виде
 
 
 int main(void)
@@ -62,19 +65,14 @@ int main(void)
 	}
 	// Приводим данные к нужной структуре
 	for (int i = 0; i < 2; i++)
-	{
 		parse_raw_data(str_nums[i], &data[i]);
-		printf("num: %sE%d;\n\n\n", data[i].mant, data[i].exp_num);
-	}
-	// Выполняем деление и выводим результат
+		// Выполняем деление и выводим результат
 	data[2] = big_division(data[0], data[1]);
 	if (!data[2].is_bad)
-	{
 		pretty_print(data);
-	}
 	else
 	{
-		printf("В результате деления получено некорректное число!");
+		printf("Ошибка. В результате деления получено некорректное число или было произведено деление на ноль.\n");
 		return DIV_ERROR;
 	}
 	return OK;
@@ -179,6 +177,7 @@ int parse_raw_data(char *str, big_num *data)
 {
 	// работа с мантиссой
 	int i = 0, j = 0;
+	int inc = 0; // Требуется для обработки ситуации, когда вводится одна "Е"
 	int point = 0;	
 	data->exp_num = 0;
 	data->sign_m = (str[i] == '-') ? MINUS : PLUS; // знак мантиссы (если есть). Записываем в отведенное поле структуры
@@ -187,7 +186,7 @@ int parse_raw_data(char *str, big_num *data)
 	else if (str[i] == 'E') // если знака и значения не было, а была "Е", то наше значение - 1
 	{
 		strcpy(data->mant, ".1000000000000000000000000000000\0");
-		data->exp_num++;
+		inc = 1;
 	}
 	while (is_digit(str[i]) || str[i] == '.') // теперь записываем значения
 	{
@@ -216,8 +215,8 @@ int parse_raw_data(char *str, big_num *data)
 	while (str[i]) // пока считываются цифры, собираем значение "Е"
 	{
 		data->exp_num = data->exp_num * 10 + (int)(str[i++] - '0');
-		// printf("$%c", str[i]);
 	}
+	data->exp_num += inc;
 	data->exp_num *= sign; // не забываем про знак
 	// преобразование к виду "(.)0xxxxxxxxxxxxx"
 	int count = 0;
@@ -254,13 +253,10 @@ int mant_diff(char *const mant1, const char *const mant2)
 {
 	if (!mant_more_eq(mant1, mant2)) // невозможно сделать вычитание, так как второе число больше
 		return NO;
-	printf("%s\n", mant1);
-	printf("%s\n", mant2);
-	printf("-----------------------------------------------\n");
 	int i = strlen(mant2) - 1;
 	for (; i >= 0; i--) // классическая процедура вычитания в столбик
 	{
-		if (mant1[i] - mant2[i] >= 0) // если разряду не нужно занимать из более высокого десятку
+		if (mant1[i] - mant2[i] >= 0) // если меньшему разряду не нужно занимать из более высокого разряда десятку
 			mant1[i] -= mant2[i] - '0';
 		else
 		{
@@ -268,12 +264,11 @@ int mant_diff(char *const mant1, const char *const mant2)
 			while (mant1[j] - '0' == 0) // && j > 0????
 				j--;
 			mant1[j]--;
-			for (j += 1; j > i; j--) //обновляем разряды
+			for (j += 1; j > i; j++) //обновляем разряды
 				mant1[j] += 9;
 			mant1[i] += 10 - (mant2[i] - '0'); // делаем вычитание в разряде-заемщике
 		}
 	}
-	printf("%s\n\n\n", mant1);
 	return YES;
 } 
 
@@ -287,15 +282,6 @@ void move_mant(big_num *const var, const int k)
 }
 
 
-void remove_zeros(big_num *const var)
-{
-	int i = 0;
-	while (var->mant[i++] == '0'); // считаем, сколько нулей
-	var->exp_num += --i - 1; // отмечаем это в разряде
-	move_mant(var, i); // сдвигаем все и приводим к нужному виду
-}
-
-
 int div_iter(big_num *const a, big_num b)
 {
 	int iter = 0;
@@ -305,10 +291,9 @@ int div_iter(big_num *const a, big_num b)
 	return iter;
 }
 
-
 int is_zero(const char *const var)
 {
-	int i;
+	int i = 0;
 	for (i = 0; var[i] == '0'; i++);
 	return (!var[i]) ? YES : NO;
 }
@@ -320,22 +305,19 @@ big_num big_division(big_num a, big_num b)
 	b.mant[0] = '0';
 	big_num res;
 	res.is_bad = 0;
-	// проверяем, является ли число нулем, и убираем ноль после точки, если не нуль
+	// проверяем, является ли делимое нулем
 	if (is_zero(a.mant))
 	{
-		strcpy(res.mant, "0\0");
+		strcpy(res.mant, "00\0");
 		res.exp_num = 0;
 		return res;
 	}
-	remove_zeros(&a);
-	// то же для b
+	// проверяем знаменатель на равенство нулю
 	if (is_zero(b.mant))
 	{
 		res.is_bad = 1;
 		return res;
 	}
-	remove_zeros(&b);
-
 	if (abs(a.exp_num - b.exp_num) > 99999) // проверка выхода степени числа за пределы области определения
 	{
 		res.is_bad = 1;
@@ -343,19 +325,16 @@ big_num big_division(big_num a, big_num b)
 	}
 	// начинаем деление в столбик (вынося первую операцию за скобку, чтобы не было 0 после точки)
 	int temp = 0; // переменная для хранения результата деления текущей стадии (очередная цифра результата)
-	// printf("%s and %s\n\n" a.mant, b.mant);	
 	if (!mant_more_eq(a.mant, b.mant)) // если делимое меньше, чем делитель, то берем из степени единицу и домножаем мантиссу на 10
 	{
 		a.exp_num -= 1;
 		move_mant(&a, 1);
 	}
-	printf("%s\n\n", a.mant);
 	temp = div_iter(&a, b); // находим первую цифру результата (если мантисса делимого равна нулю, то деление прекращается)
-	printf("after: %s\n\n", a.mant);
-	res.mant[1] = temp;
+	res.mant[0] = temp + '0';
 	for (int i = 1; i < 30; i++) // находим все остальные цифры путем деления в столбик (деление так же прекращается, если мантисса делимого = 0)
 	{
-		if (is_zero(a.mant))
+		if (is_zero(a.mant)) // если остаток после последнего деления = 0, то числа поделились нацело: конец
 		{
 			res.mant[i] = '\0';
 			temp = 0;
@@ -363,22 +342,33 @@ big_num big_division(big_num a, big_num b)
 		}
 		if (!mant_more_eq(a.mant, b.mant)) // если не вычитается, то берем больше, а в результат идет 0
 		{
-			a.exp_num -= 1;
 			move_mant(&a, 1);
 			res.mant[i] = '0';
 		}
-		else
+		else // если возможно - делим (вычитаем максимально возможное количество раз)
 		{
 			temp = div_iter(&a, b);
-			res.mant[i] = temp;
+			res.mant[i] = '0' + temp;
 		}
 	}
 	if ((temp = div_iter(&a, b)) > 5)
-		res.mant[30] += 1;
+		res.mant[29] += 1;
+	for (int i = 30; i > 0; i--)
+		res.mant[i] = res.mant[i - 1];
+	res.mant[0] = '0';
 	res.mant[31] = '\0';
 	res.sign_m = (a.sign_m * b.sign_m) % 2;
-	res.exp_num = a.exp_num - b.exp_num;
+	res.exp_num = a.exp_num - b.exp_num + 1; // прибавка единицы связана с тем, 
+	// что мы уменьшаем порядок во время сдвига результата вправо
 	return res;
+}
+
+
+void remove_zeros(char *const str)
+{
+	int i, len = strlen(str);
+	for (i = len - 1; str[i] == '0' && i > 1; i--);
+	str[i + 1] = '\0';
 }
 
 
@@ -386,14 +376,14 @@ void big_print(big_num var)
 {
 	if (var.sign_m == MINUS)
 		printf("-");
-	printf("0.");
-	printf("%s", var.mant);
+	remove_zeros(var.mant);
+	printf("0.%s", &var.mant[1]);
 	if (var.exp_num != 0)
 		printf("E%d", var.exp_num);
 }
 
 
-void pretty_print(big_num *data)
+void pretty_print(const big_num *const data)
 {
 	printf("Result: ");
 	big_print(data[0]);
