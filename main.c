@@ -2,10 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-
-// УСТРАНИТЬ ПРОБЛЕМЫ С ИТЕРАЦИЯМИ В ДЕЛЕНИИ (44 / 11 = 10?!)
-
-
 #define MAXLEN 40
 #define OK 0
 #define DIV_ERROR 1
@@ -14,28 +10,35 @@
 #define NO 0
 #define MINUS 1
 #define PLUS 0
+#define RAW_DATA_LEN 2 // количество поступающих "сырых" данных
+#define MANT_SIZE 32 // размер массива для хранения мантиссы (с учетом места под точку и '\0')
+#define MANT_LEN 30 // длина мантиссы
+#define EXP_SIZE 18
+#define OPERANDS 3
 
-typedef char raw_data_arr[2][MAXLEN + 1]; // массив для сырых данных, то есть для введенных пользователем строк
-typedef char num30[32]; // Тип "строка" для мантиссы
+typedef char raw_data_arr[RAW_DATA_LEN][MAXLEN + 1]; // массив для сырых данных, то есть для введенных пользователем строк
+typedef char num30[MANT_SIZE]; // Тип "строка" для мантиссы
 typedef struct // структура для хранения больших чисел
 {
 	short int sign_m : 1; // знак мантиссы
 	num30 mant; // значение мантиссы
-	int exp_num : 18; // степень десятки (значение после Е)
-	unsigned int is_bad : 1; // бит истинен, если число испортилось в следствие деления (не лежит в заданном диапазоне)
+	int exp_num : EXP_SIZE; // порядок числа (значение после Е)
+	unsigned int is_bad : 1; // бит истинен, если число испортилось в следствие деления (например, не лежит в заданном диапазоне или было деление на нуль)
 } big_num;
-typedef big_num big_nums_arr[3]; 
+typedef big_num big_nums_arr[OPERANDS]; 
 
 
-int my_gets(char *const str, const int max_len); // Функция ввода данных |||ВХОД: СТРОКА; ВЫХОД: СТРОКА |||
+int my_gets(char *const str, const int max_len); // Функция ввода данных 
 int is_digit(const char c); // Функция проверки, является ли символ числом
 int check_data(char *const str); // Функция проверки корректности ввода
 int parse_raw_data(char *str, big_num *data); // Функция приведения строки к виду структуры хранения больших чисел
 int mant_more_eq(const char *const mant1, const char *const mant2); // Функция ">=" для мантисс больших чисел
 int mant_diff(char *const mant1, const char *const mant2); // Функция вычитания мантисс больших чисел
-void move_mant(big_num *var, const int k); // сдвиг мантиссы
-int is_zero(const char *const var); // проверяет, является ли мантисса числа чистым нулем
+void move_mant(big_num *var, const int k); // Функция, выполняющая сдвиг мантиссы
+int is_zero(const char *const var); // Функция проверки, является ли мантисса числа чистым нулем
 big_num big_division(big_num a, big_num b); // Функция деления больших чисел
+void remove_zeros(char *const str); // Функция, убирающая незначащие нули (пример: 0.234324000000 ==> 0.234324)
+void big_print(big_num var); // Функция печати требуемых чисел
 void pretty_print(const big_num *const data); // Функция печати данных в нужном виде
 
 
@@ -78,7 +81,7 @@ int main(void)
 	return OK;
 }
 
-// проверено
+
 int my_gets(char *const str, const int max_len) // 2ой параметр - ограничение на длину строки
 {
 	int k = 0;
@@ -91,17 +94,16 @@ int my_gets(char *const str, const int max_len) // 2ой параметр - ог
 	}
 	str[k] = '\0';
 	if (k == max_len) // если достигнут лимит длины строки, то до конца строки (файла) пропускаем остальные символы
+		// (также, после этого if'a можно вернуть ошибку, поэтому данная функция все-таки возвращает целое число в качестве кода ошибки)
 		while ((c = getchar()) != '\n' && c != EOF && c != '\0');
 	return OK;
 }
 
-// очень простая, можно не проверять
 int is_digit(const char c)
 {
 	return (c - '0' >= 0 && c - '9' <= 0) ? YES : NO;
 }
 
-// проверено (неполный тест)
 int check_data(char *const str)
 {
 	int stage = 1; // стадии чтения составного числа (формально вот: +_23_._2343_Е_-_2343 - в данном случае стадии чтения ограничены символом "_")
@@ -111,20 +113,20 @@ int check_data(char *const str)
 		switch (stage) 
 		{
 			case 1:
-				if (str[i] == '+' || str[i] == '-' || is_digit(str[i])) // прочитан знак, следующая цифра (или точка..)
+				if (str[i] == '+' || str[i] == '-' || is_digit(str[i])) // прочитан знак, следующая цифра (или точка)
 					stage = 2;
 				else if (str[i] == '.') // прочитана точка, пропускаем первую стадию с цифрой
 					stage = 3;
-				else if (str[i] == 'E') // мантиссы не ожидается, переход к стадии ввода знака и значения степени десятки
+				else if (str[i] == 'E') // мантиссы не ожидается, переход к стадии ввода знака и значения порядка
 					stage = 5;
 				else
-					return CHECK_ERROR; // *не один сценарий не случился*
+					return CHECK_ERROR; // *ни один сценарий не случился*
 				break;
 
 			case 2:
 				if (str[i] == 'E')
 				{
-					if (i > 30)
+					if (i > 30) // проверка на длину мантиссы
 						return CHECK_ERROR;
 					stage = 5;
 				}
@@ -135,7 +137,7 @@ int check_data(char *const str)
 				break;
 
 			case 3: // стадия "после точки". ожидается число. Если число получено, то переход к стадии ожидания "Е"
-				point = 1;
+				point = 1; // фиксируем факт получения точки
 				if (!is_digit(str[i]))
 					return CHECK_ERROR;
 				stage = 4;
@@ -144,7 +146,7 @@ int check_data(char *const str)
 			case 4: // стадия ожидания "Е"
 				if (str[i] == 'E') 
 				{
-					if (!(i <= 30 || (point && i <= 31)))
+					if (i > 30 + point) // проверка длины мантиссы с учетом точки
 						return CHECK_ERROR;
 					stage = 5;
 				}
@@ -152,7 +154,7 @@ int check_data(char *const str)
 					return CHECK_ERROR;
 				break;
 
-			case 5: // стадия ожидания знака или перехода к проверки значения "Е"
+			case 5: // стадия ожидания знака или перехода к проверке значения "Е"
 				if (str[i] == '+' || str[i] == '-' || is_digit(str[i]))
 					stage = 6;
 				else
@@ -163,7 +165,6 @@ int check_data(char *const str)
 				if (!is_digit(str[i]))
 					return CHECK_ERROR;
 				break;
-				// ограничение на длину
 
 			default:
 				return CHECK_ERROR;
@@ -172,13 +173,12 @@ int check_data(char *const str)
 	return OK;
 } 
 
-// проверено (неполный тест)
 int parse_raw_data(char *str, big_num *data)
 {
 	// работа с мантиссой
 	int i = 0, j = 0;
 	int inc = 0; // Требуется для обработки ситуации, когда вводится одна "Е"
-	int point = 0;	
+	int point = 0; 
 	data->exp_num = 0;
 	data->sign_m = (str[i] == '-') ? MINUS : PLUS; // знак мантиссы (если есть). Записываем в отведенное поле структуры
 	if (str[i] == '+' || str[i] == '-') // знак учтен, пропускаем, переходя к значению
@@ -195,10 +195,10 @@ int parse_raw_data(char *str, big_num *data)
 		data->mant[j++] = str[i++];
 	}
 	// если в числе нет точки, то вставляем ее (после прочитанной целой части)
-	// это требуется для унификации процедуры выравнивания мантисс чисел
+	// * это требуется для унификации процедуры выравнивания мантисс чисел
 	if (!point)
 		data->mant[j++] = '.'; 
-	while (j < 31)
+	while (j < MANT_SIZE - 1) // дополняем мантиссу нулями до размера в 30 значащих чисел (может повлиять на точность деления)
 		data->mant[j++] = '0';
 	data->mant[j] = '\0';
 	// работа с "Е"
@@ -222,7 +222,7 @@ int parse_raw_data(char *str, big_num *data)
 	int count = 0;
 	while (data->mant[count] != '.')
 		count++; // ищем позицию точки
-	data->exp_num += count; // увеличиваем значение степени десятки
+	data->exp_num += count; // увеличиваем значение порядка
 	while (count > 0)
 	{
 		data->mant[count] = data->mant[count - 1]; // смещаем точку и получаем из "ххх.ххххх" ---> "0ххххххххххх"
@@ -234,7 +234,6 @@ int parse_raw_data(char *str, big_num *data)
 	return OK;
 }
 
-// проверено
 int mant_more_eq(const char *const mant1, const char *const mant2)
 {
 	int i, diff;
@@ -242,9 +241,10 @@ int mant_more_eq(const char *const mant1, const char *const mant2)
 	{
 		if ((diff = (int)(mant1[i] - mant2[i])) < 0) // если цифра во второй мантиссе больше, значит второе число больше
 			return NO;
-		else if (diff > 0)
+		else if (diff > 0) // в таком случае больше первое число
 			return YES;
 	}
+	// числа равны
 	return YES;
 }
 
@@ -261,7 +261,7 @@ int mant_diff(char *const mant1, const char *const mant2)
 		else
 		{
 			int j = i - 1; // ищем, у кого занять
-			while (mant1[j] - '0' == 0) // && j > 0????
+			while (mant1[j] - '0' == 0) 
 				j--;
 			mant1[j]--;
 			for (j += 1; j > i; j++) //обновляем разряды
@@ -272,12 +272,12 @@ int mant_diff(char *const mant1, const char *const mant2)
 	return YES;
 } 
 
-// проверено
+
 void move_mant(big_num *const var, const int k)
 {
-	for (int i = 0; i < 31 - k; i++)
+	for (int i = 0; i < MANT_SIZE - 1 - k; i++)
 		var->mant[i] = var->mant[i+k];
-	for (int j = 31 - k; j < 31; j++)
+	for (int j = MANT_SIZE - 1 - k; j < MANT_SIZE - 1; j++)
 		var->mant[j] = '0';
 }
 
@@ -285,9 +285,9 @@ void move_mant(big_num *const var, const int k)
 int div_iter(big_num *const a, big_num b)
 {
 	int iter = 0;
-	while (mant_diff(a->mant, b.mant))
+	while (mant_diff(a->mant, b.mant)) // считаем, сколько раз можно вычесть второе число из первого (делим нацело первое число на второе)
 		iter++;
-	move_mant(a, 1);
+	move_mant(a, 1); // сдвигаем мантиссу (аналогично тому, как происходит деление в столбик)
 	return iter;
 }
 
@@ -332,7 +332,7 @@ big_num big_division(big_num a, big_num b)
 	}
 	temp = div_iter(&a, b); // находим первую цифру результата (если мантисса делимого равна нулю, то деление прекращается)
 	res.mant[0] = temp + '0';
-	for (int i = 1; i < 30; i++) // находим все остальные цифры путем деления в столбик (деление так же прекращается, если мантисса делимого = 0)
+	for (int i = 1; i < MANT_LEN; i++) // находим все остальные цифры путем деления в столбик (деление так же прекращается, если мантисса делимого = 0)
 	{
 		if (is_zero(a.mant)) // если остаток после последнего деления = 0, то числа поделились нацело: конец
 		{
@@ -352,11 +352,11 @@ big_num big_division(big_num a, big_num b)
 		}
 	}
 	if ((temp = div_iter(&a, b)) > 5)
-		res.mant[29] += 1;
-	for (int i = 30; i > 0; i--)
+		res.mant[MANT_LEN - 1] += 1;
+	for (int i = MANT_LEN; i > 0; i--)
 		res.mant[i] = res.mant[i - 1];
 	res.mant[0] = '0';
-	res.mant[31] = '\0';
+	res.mant[MANT_SIZE - 1] = '\0';
 	res.sign_m = (a.sign_m * b.sign_m) % 2;
 	res.exp_num = a.exp_num - b.exp_num + 1; // прибавка единицы связана с тем, 
 	// что мы уменьшаем порядок во время сдвига результата вправо
@@ -364,9 +364,9 @@ big_num big_division(big_num a, big_num b)
 }
 
 
-void remove_zeros(char *const str)
+void remove_zeros(char *const str) 
 {
-	int i, len = strlen(str);
+	int i, len = strlen(str); 
 	for (i = len - 1; str[i] == '0' && i > 1; i--);
 	str[i + 1] = '\0';
 }
