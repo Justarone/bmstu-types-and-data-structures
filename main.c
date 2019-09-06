@@ -252,23 +252,23 @@ int mant_more_eq(const char *const mant1, const char *const mant2)
 
 int mant_diff(char *const mant1, const char *const mant2)
 {
+	if (!mant_more_eq(mant1, mant2)) // невозможно сделать вычитание, так как второе число больше
+		return NO;
 	printf("%s\n", mant1);
 	printf("%s\n", mant2);
 	printf("-----------------------------------------------\n");
-	if (!mant_more_eq(mant1, mant2)) // невозможно сделать вычитание, так как второе число больше
-		return NO;
 	int i = strlen(mant2) - 1;
 	for (; i >= 0; i--) // классическая процедура вычитания в столбик
 	{
-		if (mant1[i] - mant2[i] > 0) // если разряду не нужно занимать из более высокого десятку
+		if (mant1[i] - mant2[i] >= 0) // если разряду не нужно занимать из более высокого десятку
 			mant1[i] -= mant2[i] - '0';
 		else
 		{
 			int j = i - 1; // ищем, у кого занять
-			while (mant1[j] - '0' == 0 && j > 0)
+			while (mant1[j] - '0' == 0) // && j > 0????
 				j--;
 			mant1[j]--;
-			for (j -= 1; j > i; j--) //обновляем разряды
+			for (j += 1; j > i; j--) //обновляем разряды
 				mant1[j] += 9;
 			mant1[i] += 10 - (mant2[i] - '0'); // делаем вычитание в разряде-заемщике
 		}
@@ -280,13 +280,10 @@ int mant_diff(char *const mant1, const char *const mant2)
 // проверено
 void move_mant(big_num *const var, const int k)
 {
-	printf("before: %s\n", var->mant);
 	for (int i = 0; i < 31 - k; i++)
 		var->mant[i] = var->mant[i+k];
 	for (int j = 31 - k; j < 31; j++)
 		var->mant[j] = '0';
-	printf("after:  %s\n\n", var->mant);
-
 }
 
 
