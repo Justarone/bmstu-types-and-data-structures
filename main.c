@@ -107,7 +107,8 @@ int is_digit(const char c)
 int check_data(char *const str)
 {
 	int stage = 1; // стадии чтения составного числа (формально вот: +_23_._2343_Е_-_2343 - в данном случае стадии чтения ограничены символом "_")
-	int point = 0;
+	int point = 0; // переменная-флаг, указывающая была ли точка в мантиссе или нет (1 - была, 0 - нет)
+	int e_counter = 0; // счетчик количества цифр в порядке числа (очевидно, что если их больше 6, то у нас переполнение)
 	for (int i = 0; str[i]; i++)
 	{
 		switch (stage) 
@@ -155,7 +156,7 @@ int check_data(char *const str)
 				break;
 
 			case 5: // стадия ожидания знака или перехода к проверке значения "Е"
-				if (str[i] == '+' || str[i] == '-' || is_digit(str[i]))
+				if (str[i] == '+' || str[i] == '-' || (e_counter = is_digit(str[i])))
 					stage = 6;
 				else
 					return CHECK_ERROR;
@@ -163,6 +164,10 @@ int check_data(char *const str)
 
 			case 6: // стадия окончательной проверки "Е"
 				if (!is_digit(str[i]))
+					return CHECK_ERROR;
+				else
+					e_counter++;
+				if (e_counter == 6)
 					return CHECK_ERROR;
 				break;
 
@@ -305,17 +310,17 @@ big_num big_division(big_num a, big_num b)
 	b.mant[0] = '0';
 	big_num res;
 	res.is_bad = 0;
+	// проверяем знаменатель на равенство нулю
+	if (is_zero(b.mant))
+	{
+		res.is_bad = 1;
+		return res;
+	}
 	// проверяем, является ли делимое нулем
 	if (is_zero(a.mant))
 	{
 		strcpy(res.mant, "00\0");
 		res.exp_num = 0;
-		return res;
-	}
-	// проверяем знаменатель на равенство нулю
-	if (is_zero(b.mant))
-	{
-		res.is_bad = 1;
 		return res;
 	}
 	if (abs(a.exp_num - b.exp_num) > 99999) // проверка выхода степени числа за пределы области определения
