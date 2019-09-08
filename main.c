@@ -2,10 +2,11 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define MAXLEN 40
+#define MAXLEN 40 // максимальная длина вводимой строки (учитывая знаки, "Е" и прочее)
 #define OK 0
-#define DIV_ERROR 1
-#define CHECK_ERROR 2
+#define ZERO_DIV_ERROR 1 // ошибка деления: деление на нуль
+#define TOO_BIG_E_ERROR 2 // ошибка деления: число выходит за диапазон
+#define CHECK_ERROR 3 // ошибка, связанная с неверным вводом числа
 #define YES 1
 #define NO 0
 #define MINUS 1
@@ -13,8 +14,8 @@
 #define RAW_DATA_LEN 2 // количество поступающих "сырых" данных
 #define MANT_SIZE 32 // размер массива для хранения мантиссы (с учетом места под точку и '\0')
 #define MANT_LEN 30 // длина мантиссы
-#define EXP_SIZE 18
-#define OPERANDS 3
+#define EXP_SIZE 18 // количество битов, необходимое для записи порядка числа 
+#define OPERANDS 3 // кол-во операндов (делимое, делитель, частное)
 
 typedef char raw_data_arr[RAW_DATA_LEN][MAXLEN + 1]; // массив для сырых данных, то есть для введенных пользователем строк
 typedef char num30[MANT_SIZE]; // Тип "строка" для мантиссы
@@ -23,7 +24,7 @@ typedef struct // структура для хранения больших чи
 	short int sign_m : 1; // знак мантиссы
 	num30 mant; // значение мантиссы
 	int exp_num : EXP_SIZE; // порядок числа (значение после Е)
-	unsigned int is_bad : 1; // бит истинен, если число испортилось в следствие деления (например, не лежит в заданном диапазоне или было деление на нуль)
+	unsigned int error_code : 2; // бит истинен, если число испортилось в следствие деления (например, не лежит в заданном диапазоне или было деление на нуль)
 } big_num;
 typedef big_num big_nums_arr[OPERANDS]; 
 
@@ -81,12 +82,12 @@ int main(void)
 	// Выполняем деление и выводим результат
 	printf("Result: %s / %s = ", str_nums[0], str_nums[1]);
 	data[2] = big_division(data[0], data[1]);
-	if (!data[2].is_bad)
+	if (!data[2].error_code)
 		pretty_print(data);
 	else
 	{
-		printf("Ошибка. В результате деления получено некорректное число или было произведено деление на ноль.\n");
-		return DIV_ERROR;
+		printf("Ошибка. В результате деления получено некорректное число (выходящее за диапазон) или было произведено деление на ноль.\n");
+		return data[2].error_code;
 	}
 	return OK;
 }
@@ -128,7 +129,8 @@ int check_data(char *const str)
 	int point = 0; // переменная-флаг, указывающая была ли точка в мантиссе или нет (1 - была, 0 - нет)
 	int sign = 0;
 	int e_counter = 0; // счетчик количества цифр в порядке числа (очевидно, что если их больше 6, то у нас переполнение)
-	for (int i = 0; str[i]; i++)
+	int i;
+	for (i = 0; str[i]; i++)
 	{
 		switch (stage) 
 		{
@@ -199,7 +201,7 @@ int check_data(char *const str)
 				return CHECK_ERROR;
 		}
 	}
-	return OK;
+	return (i == 0) ? CHECK_ERROR : OK;
 } 
 
 int parse_raw_data(char *str, big_num *data)
@@ -333,11 +335,11 @@ big_num big_division(big_num a, big_num b)
 	a.mant[0] = '0';
 	b.mant[0] = '0';
 	big_num res;
-	res.is_bad = 0;
+	res.error_code = 0;
 	// проверяем знаменатель на равенство нулю
 	if (is_zero(b.mant))
 	{
-		res.is_bad = 1;
+		res.error_code = ZERO_DIV_ERROR;
 		return res;
 	}
 	// проверяем, является ли делимое нулем
@@ -349,7 +351,7 @@ big_num big_division(big_num a, big_num b)
 	}
 	if (abs(a.exp_num - b.exp_num) > 99999) // проверка выхода степени числа за пределы области определения
 	{
-		res.is_bad = 1;
+		res.error_code = TOO_BIG_E_ERROR;
 		return res;
 	}
 	// начинаем деление в столбик (вынося первую операцию за скобку, чтобы не было 0 после точки)
