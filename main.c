@@ -53,22 +53,26 @@ int main(void)
 	// Получаем данные от пользователя и сразу проверяем корректность
 	printf("Введите число (делимое) в формате с точкой (.00025, +123001, –123.456) или \
 экспоненциальном формате (1234567Е–20, 1234567Е20 или -123.4567Е23) и нажмите Enter:\n\
+    5    10   15   20   25   30   35   40\n\
 |---|----|----|----|----|----|----|----|--\n");
 	my_gets(str_nums[0], MAXLEN);
 	while (check_data(str_nums[0]))
 	{
 		printf("Неверный формат, повторите:\n\
+    5    10   15   20   25   30   35   40\n\
 |---|----|----|----|----|----|----|----|--\n");
 		my_gets(str_nums[0], MAXLEN);
 	}
 
 	printf("Введите второе число (делитель) в том же формате и нажмите Enter:\n\
+    5    10   15   20   25   30   35   40\n\
 |---|----|----|----|----|----|----|----|--\n");
 	my_gets(str_nums[1], MAXLEN);
 	while (check_data(str_nums[1]))
 	{
 		printf("Неверный формат, повторите:\n\
-|---|----|----|----|----|----|----|----|--\n");
+    5    10   15   20   25   30   35   40\n\
+----|----|----|----|----|----|----|----|--\n");
 		my_gets(str_nums[1], MAXLEN);
 	}
 	// Приводим данные к нужной структуре
@@ -256,7 +260,6 @@ int parse_raw_data(char *str, big_num *data)
 	// p.s.: точку в мантиссе я решил заменить на доп разряд, чтобы следить за переполнением
 	// таким образом имеем "0*" вместо ".*"
 	data->mant[count] = '0';
-	printf("after parsing mant: %s\n\n", data->mant);
 	return OK;
 }
 
@@ -277,7 +280,6 @@ int mant_more_eq(const char *const mant1, const char *const mant2)
 
 int mant_diff(char *const mant1, const char *const mant2)
 {
-	printf("here is:\n %s - %s\n\n", mant1, mant2);
 	if (!mant_more_eq(mant1, mant2)) // невозможно сделать вычитание, так как второе число больше
 		return NO;
 	for (int i = strlen(mant2) - 1; i >= 0; i--) // классическая процедура вычитания в столбик
@@ -296,7 +298,6 @@ int mant_diff(char *const mant1, const char *const mant2)
 			mant1[i] += 10 - (mant2[i] - '0'); // делаем вычитание в разряде-заемщике
 		}
 	}
-	printf("and result is: %s\n", mant1);	
 	return YES;
 } 
 
@@ -381,9 +382,10 @@ big_num big_division(big_num a, big_num b)
 			res.mant[i] = '0' + temp;
 		}
 	}
+	res.mant[MANT_LEN + 1] = '\0';
 	if (i == MANT_LEN + 1 && (temp = div_iter(&a, b)) >= 5) // округление
 		res.mant[MANT_LEN] += 1;
-	for (; i < MANT_LEN + 1; i++)
+	for (; i < MANT_LEN + 1; i++) // приведение мантиссы к 30 знакам
 		res.mant[i] = '0';
 	res.mant[MANT_LEN + 1] = '\0';
 	int inc = 0;
