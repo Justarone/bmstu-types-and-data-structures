@@ -35,6 +35,7 @@ int parse_raw_data(char *str, big_num *data); // Функция приведен
 int mant_more_eq(const char *const mant1, const char *const mant2); // Функция ">=" для мантисс больших чисел
 int mant_diff(char *const mant1, const char *const mant2); // Функция вычитания мантисс больших чисел
 void move_mant(big_num *var, const int k); // Функция, выполняющая сдвиг мантиссы
+int div_iter(big_num *const a, const big_num b); // Функция выполнения одной итерации деления
 int is_zero(const char *const var); // Функция проверки, является ли мантисса числа чистым нулем
 big_num big_division(big_num a, big_num b); // Функция деления больших чисел
 void remove_zeros(char *const str); // Функция, убирающая незначащие нули (пример: 0.234324000000 ==> 0.234324)
@@ -51,19 +52,23 @@ int main(void)
 
 	// Получаем данные от пользователя и сразу проверяем корректность
 	printf("Введите число (делимое) в формате с точкой (.00025, +123001, –123.456) или \
-экспоненциальном формате (1234567Е–20, 1234567Е20 или -123.4567Е23) и нажмите Enter:\n");
+экспоненциальном формате (1234567Е–20, 1234567Е20 или -123.4567Е23) и нажмите Enter:\n\
+|---|----|----|----|----|----|----|----|--\n");
 	my_gets(str_nums[0], MAXLEN);
 	while (check_data(str_nums[0]))
 	{
-		printf("Неверный формат, повторите:\n");
+		printf("Неверный формат, повторите:\n\
+|---|----|----|----|----|----|----|----|--\n");
 		my_gets(str_nums[0], MAXLEN);
 	}
 
-	printf("Введите второе число (делитель) в том же формате и нажмите Enter:\n");
+	printf("Введите второе число (делитель) в том же формате и нажмите Enter:\n\
+|---|----|----|----|----|----|----|----|--\n");
 	my_gets(str_nums[1], MAXLEN);
 	while (check_data(str_nums[1]))
 	{
-		printf("Неверный формат, повторите:\n");
+		printf("Неверный формат, повторите:\n\
+|---|----|----|----|----|----|----|----|--\n");
 		my_gets(str_nums[1], MAXLEN);
 	}
 	// Приводим данные к нужной структуре
@@ -117,6 +122,7 @@ int check_data(char *const str)
 {
 	int stage = 1; // стадии чтения составного числа (формально вот: +_23_._2343_Е_-_2343 - в данном случае стадии чтения ограничены символом "_")
 	int point = 0; // переменная-флаг, указывающая была ли точка в мантиссе или нет (1 - была, 0 - нет)
+	int sign = 0;
 	int e_counter = 0; // счетчик количества цифр в порядке числа (очевидно, что если их больше 6, то у нас переполнение)
 	for (int i = 0; str[i]; i++)
 	{
@@ -124,7 +130,11 @@ int check_data(char *const str)
 		{
 			case 1:
 				if (str[i] == '+' || str[i] == '-' || is_digit(str[i])) // прочитан знак, следующая цифра (или точка)
+				{
+					if (!is_digit(str[i]))
+						sign = 1;
 					stage = 2;
+				}
 				else if (str[i] == '.') // прочитана точка, пропускаем первую стадию с цифрой
 					stage = 3;
 				else if (str[i] == 'E') // мантиссы не ожидается, переход к стадии ввода знака и значения порядка
@@ -134,10 +144,10 @@ int check_data(char *const str)
 				break;
 
 			case 2:
+				if (i >= sign + MANT_LEN && str[i] != 'E' && str[i] != '.') // проверка на длину мантиссы
+					return CHECK_ERROR;
 				if (str[i] == 'E')
 				{
-					if (i > 30) // проверка на длину мантиссы
-						return CHECK_ERROR;
 					stage = 5;
 				}
 				else if (str[i] == '.')
@@ -155,10 +165,10 @@ int check_data(char *const str)
 				break;
 
 			case 4: // стадия ожидания "Е"
+				if (i >= sign + point + MANT_LEN && str[i] != 'E' && str[i] != '.') // проверка длины мантиссы с учетом точки
+					return CHECK_ERROR;
 				if (str[i] == 'E') 
 				{
-					if (i > 30 + point) // проверка длины мантиссы с учетом точки
-						return CHECK_ERROR;
 					stage = 5;
 				}
 				else if (!is_digit(str[i]))
@@ -203,7 +213,7 @@ int parse_raw_data(char *str, big_num *data)
 		strcpy(data->mant, ".1000000000000000000000000000000\0");
 		inc = 1;
 	}
-	while (is_digit(str[i]) || str[i] == '.') // теперь записываем значения
+	while ((is_digit(str[i]) || str[i] == '.') && j < MANT_SIZE - 1) // теперь записываем значения (возможно, условие на j избыточное!!!)
 	{
 		if (str[i] == '.') // проверяем, есть ли в числе точка
 			point = 1;
@@ -246,6 +256,7 @@ int parse_raw_data(char *str, big_num *data)
 	// p.s.: точку в мантиссе я решил заменить на доп разряд, чтобы следить за переполнением
 	// таким образом имеем "0*" вместо ".*"
 	data->mant[count] = '0';
+	printf("after parsing mant: %s\n\n", data->mant);
 	return OK;
 }
 
@@ -266,10 +277,10 @@ int mant_more_eq(const char *const mant1, const char *const mant2)
 
 int mant_diff(char *const mant1, const char *const mant2)
 {
+	printf("here is:\n %s - %s\n\n", mant1, mant2);
 	if (!mant_more_eq(mant1, mant2)) // невозможно сделать вычитание, так как второе число больше
 		return NO;
-	int i = strlen(mant2) - 1;
-	for (; i >= 0; i--) // классическая процедура вычитания в столбик
+	for (int i = strlen(mant2) - 1; i >= 0; i--) // классическая процедура вычитания в столбик
 	{
 		if (mant1[i] - mant2[i] >= 0) // если меньшему разряду не нужно занимать из более высокого разряда десятку
 			mant1[i] -= mant2[i] - '0';
@@ -279,11 +290,13 @@ int mant_diff(char *const mant1, const char *const mant2)
 			while (mant1[j] - '0' == 0) 
 				j--;
 			mant1[j]--;
-			for (j += 1; j > i; j++) //обновляем разряды
+			j++;
+			for (; j < i; j++) //обновляем разряды
 				mant1[j] += 9;
 			mant1[i] += 10 - (mant2[i] - '0'); // делаем вычитание в разряде-заемщике
 		}
 	}
+	printf("and result is: %s\n", mant1);	
 	return YES;
 } 
 
@@ -291,13 +304,13 @@ int mant_diff(char *const mant1, const char *const mant2)
 void move_mant(big_num *const var, const int k)
 {
 	for (int i = 0; i < MANT_SIZE - 1 - k; i++)
-		var->mant[i] = var->mant[i+k];
+		var->mant[i] = var->mant[i + k];
 	for (int j = MANT_SIZE - 1 - k; j < MANT_SIZE - 1; j++)
 		var->mant[j] = '0';
 }
 
 
-int div_iter(big_num *const a, big_num b)
+int div_iter(big_num *const a, const big_num b)
 {
 	int iter = 0;
 	while (mant_diff(a->mant, b.mant)) // считаем, сколько раз можно вычесть второе число из первого (делим нацело первое число на второе)
@@ -345,9 +358,11 @@ big_num big_division(big_num a, big_num b)
 		a.exp_num -= 1;
 		move_mant(&a, 1);
 	}
+	res.mant[0] = '0';
 	temp = div_iter(&a, b); // находим первую цифру результата (если мантисса делимого равна нулю, то деление прекращается)
-	res.mant[0] = temp + '0';
-	for (int i = 1; i < MANT_LEN; i++) // находим все остальные цифры путем деления в столбик (деление так же прекращается, если мантисса делимого = 0)
+	res.mant[1] = temp + '0';
+	int i;
+	for (i = 2; i < MANT_LEN + 1; i++) // находим все остальные цифры путем деления в столбик (деление так же прекращается, если мантисса делимого = 0)
 	{
 		if (is_zero(a.mant)) // если остаток после последнего деления = 0, то числа поделились нацело: конец
 		{
@@ -366,27 +381,31 @@ big_num big_division(big_num a, big_num b)
 			res.mant[i] = '0' + temp;
 		}
 	}
-	if ((temp = div_iter(&a, b)) > 5) // округление
-		res.mant[MANT_LEN - 1] += 1;
-	//=========================================================================================================================ИСПРАВИТЬ
+	if (i == MANT_LEN + 1 && (temp = div_iter(&a, b)) >= 5) // округление
+		res.mant[MANT_LEN] += 1;
+	for (; i < MANT_LEN + 1; i++)
+		res.mant[i] = '0';
+	res.mant[MANT_LEN + 1] = '\0';
 	int inc = 0;
-	for (int i = MANT_LEN - 1; i >= 0; i--) // округление высших разрядов (в случае 0.999....)
+	for (i = MANT_LEN; i >= 0; i--) // округление высших разрядов (в случае 0.999....)
 	{
 		res.mant[i] += inc;
 		if (res.mant[i] == ':')
 		{
-			res.mant[i] = 0;
+			res.mant[i] = '0';
 			inc = 1;
 		}
 		else
 			break;
 	}
-	if (inc == 1) // если округляли число с мантиссой вида 99999..
-		strcpy(res.mant, "100000000000000000000000000000");
-	//==========================================================================================================================
-	for (int i = MANT_LEN; i > 0; i--)
-		res.mant[i] = res.mant[i - 1];
-	res.mant[0] = '0';
+	if (res.mant[0] == '1')
+	{
+		for (i = MANT_LEN; i > 0; i--)
+			res.mant[i] = res.mant[i - 1];
+		res.mant[0] = '0';
+	}
+	else
+		inc = 0;
 	res.mant[MANT_SIZE - 1] = '\0';
 	res.sign_m = (a.sign_m * b.sign_m) % 2;
 	res.exp_num = a.exp_num - b.exp_num + 1 + inc; // прибавка единицы связана с тем, 
