@@ -69,7 +69,8 @@ int main(void)
 	// Приводим данные к нужной структуре
 	for (int i = 0; i < 2; i++)
 		parse_raw_data(str_nums[i], &data[i]);
-		// Выполняем деление и выводим результат
+	// Выполняем деление и выводим результат
+	printf("Result: %s / %s = ", str_nums[0], str_nums[1]);
 	data[2] = big_division(data[0], data[1]);
 	if (!data[2].is_bad)
 		pretty_print(data);
@@ -86,7 +87,15 @@ int my_gets(char *const str, const int max_len) // 2ой параметр - ог
 {
 	int k = 0;
 	char c;
-	while ((c = getchar()) == ' '); // пропускаем пробелы при вводе пользователя (игнорируем)
+	int flag_z = 0;
+	while ((c = getchar()) == ' ' || c == '0') // пропускаем пробелы при вводе пользователя (игнорируем) а так же незначимые нули
+		if (c == '0')
+			flag_z = 1;
+	if ((c == EOF || c == '\n' || c == '\0') && flag_z) // если строка кончилась, а у нас был нуль, то искомое число = нуль
+	{
+		strcpy(str, "0");
+		return OK;
+	}
 	while (k < max_len && c != '\n' && c != EOF && c != '\0') // пока не конец, не Enter и не достигнуто ограничение
 	{
 		str[k++] = c;
@@ -138,9 +147,10 @@ int check_data(char *const str)
 				break;
 
 			case 3: // стадия "после точки". ожидается число. Если число получено, то переход к стадии ожидания "Е"
+			// ИСХОДЯ ИЗ ПРИМЕРОВ ДАННАЯ СТАДИЯ НЕ БУДЕТ ОЖИДАТЬ ЧИСЛО ПОСЛЕ ТОЧКИ (чтобы вернуть данное ожидание, раскомментируй строку)
 				point = 1; // фиксируем факт получения точки
-				if (!is_digit(str[i]))
-					return CHECK_ERROR;
+				// if (!is_digit(str[i]))
+				// 	return CHECK_ERROR;
 				stage = 4;
 				break;
 
@@ -356,14 +366,30 @@ big_num big_division(big_num a, big_num b)
 			res.mant[i] = '0' + temp;
 		}
 	}
-	if ((temp = div_iter(&a, b)) > 5)
+	if ((temp = div_iter(&a, b)) > 5) // округление
 		res.mant[MANT_LEN - 1] += 1;
+	//=========================================================================================================================ИСПРАВИТЬ
+	int inc = 0;
+	for (int i = MANT_LEN - 1; i >= 0; i--) // округление высших разрядов (в случае 0.999....)
+	{
+		res.mant[i] += inc;
+		if (res.mant[i] == ':')
+		{
+			res.mant[i] = 0;
+			inc = 1;
+		}
+		else
+			break;
+	}
+	if (inc == 1) // если округляли число с мантиссой вида 99999..
+		strcpy(res.mant, "100000000000000000000000000000");
+	//==========================================================================================================================
 	for (int i = MANT_LEN; i > 0; i--)
 		res.mant[i] = res.mant[i - 1];
 	res.mant[0] = '0';
 	res.mant[MANT_SIZE - 1] = '\0';
 	res.sign_m = (a.sign_m * b.sign_m) % 2;
-	res.exp_num = a.exp_num - b.exp_num + 1; // прибавка единицы связана с тем, 
+	res.exp_num = a.exp_num - b.exp_num + 1 + inc; // прибавка единицы связана с тем, 
 	// что мы уменьшаем порядок во время сдвига результата вправо
 	return res;
 }
@@ -390,7 +416,6 @@ void big_print(big_num var)
 
 void pretty_print(const big_num *const data)
 {
-	printf("Result: ");
 	big_print(data[0]);
 	printf(" / ");
 	big_print(data[1]);
