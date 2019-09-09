@@ -166,7 +166,9 @@ int check_data(char *const str)
 			// ИСХОДЯ ИЗ ПРИМЕРОВ ДАННАЯ СТАДИЯ НЕ БУДЕТ ОЖИДАТЬ ЧИСЛО ПОСЛЕ ТОЧКИ (чтобы вернуть данное ожидание, раскомментируй строку)
 				point = 1; // фиксируем факт получения точки
 				// if (!is_digit(str[i]))
-				// 	return CHECK_ERROR;
+				// return CHECK_ERROR;
+				if (!is_digit(str[i]) && str[i] != 'E')
+					return CHECK_ERROR; 
 				stage = 4;
 				break;
 
