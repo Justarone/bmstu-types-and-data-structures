@@ -279,7 +279,7 @@ int parse_raw_data(char *str, big_num *data)
 		for (i = 1; data->mant[i] == '0' && data->mant[i];)
 			i++;
 		move_mant(data, i - 1);
-		data->exp_num += i - 1;
+		data->exp_num -= i - 1;
 	}
 	return OK;
 }
@@ -359,7 +359,7 @@ big_num big_division(big_num a, big_num b)
 		res.exp_num = 0;
 		return res;
 	}
-	if (abs(a.exp_num - b.exp_num) > 99999) // проверка выхода степени числа за пределы области определения
+	if (abs(a.exp_num - b.exp_num) > 100050) // проверка выхода степени числа за пределы области определения
 	{
 		res.error_code = TOO_BIG_E_ERROR;
 		return res;
@@ -424,6 +424,8 @@ big_num big_division(big_num a, big_num b)
 	res.sign_m = (a.sign_m * b.sign_m) % 2;
 	res.exp_num = a.exp_num - b.exp_num + 1 + inc; // прибавка единицы связана с тем, 
 	// что мы уменьшаем порядок во время сдвига результата вправо
+	if (abs(a.exp_num - b.exp_num) > 99999) // проверка выхода степени числа за пределы области определения
+		res.error_code = TOO_BIG_E_ERROR;
 	return res;
 }
 
@@ -449,10 +451,10 @@ void big_print(big_num var)
 
 void pretty_print(const big_num *const data)
 {
-	big_print(data[0]);
-	printf(" / ");
-	big_print(data[1]);
-	printf(" = ");
+	// big_print(data[0]);
+	// printf(" / ");
+	// big_print(data[1]);
+	// printf(" = ");
 	big_print(data[2]);
 	printf(";\n");
 }
