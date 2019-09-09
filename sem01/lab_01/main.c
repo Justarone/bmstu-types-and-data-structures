@@ -53,7 +53,7 @@ int main(void)
 
 	// Получаем данные от пользователя и сразу проверяем корректность
 	printf("Введите число (делимое) в формате с точкой (.00025, +123001, –123.456) или \
-экспоненциальном формате (1234567Е–20, 1234567Е20 или -123.4567Е23) и нажмите Enter:\n\
+экспоненциальном формате (1234567Е–20, 1234567Е20 или -123.4567Е23) без пробелов и нажмите Enter:\n\
     5    10   15   20   25   30   35   40\n\
 |---|----|----|----|----|----|----|----|--\n");
 	my_gets(str_nums[0], MAXLEN);
@@ -206,6 +206,16 @@ int check_data(char *const str)
 	return (i == 0) ? CHECK_ERROR : OK;
 } 
 
+
+void move_mant(big_num *const var, const int k)
+{
+	for (int i = 0; i < MANT_SIZE - 1 - k; i++)
+		var->mant[i] = var->mant[i + k];
+	for (int j = MANT_SIZE - 1 - k; j < MANT_SIZE - 1; j++)
+		var->mant[j] = '0';
+}
+
+
 int parse_raw_data(char *str, big_num *data)
 {
 	// работа с мантиссой
@@ -264,6 +274,13 @@ int parse_raw_data(char *str, big_num *data)
 	// p.s.: точку в мантиссе я решил заменить на доп разряд, чтобы следить за переполнением
 	// таким образом имеем "0*" вместо ".*"
 	data->mant[count] = '0';
+	if (!is_zero(data->mant) && data->mant[1] == '0') // приведение к нормальному виду
+	{
+		for (i = 1; data->mant[i] == '0' && data->mant[i];)
+			i++;
+		move_mant(data, i - 1);
+		data->exp_num += i - 1;
+	}
 	return OK;
 }
 
@@ -304,15 +321,6 @@ int mant_diff(char *const mant1, const char *const mant2)
 	}
 	return YES;
 } 
-
-
-void move_mant(big_num *const var, const int k)
-{
-	for (int i = 0; i < MANT_SIZE - 1 - k; i++)
-		var->mant[i] = var->mant[i + k];
-	for (int j = MANT_SIZE - 1 - k; j < MANT_SIZE - 1; j++)
-		var->mant[j] = '0';
-}
 
 
 int div_iter(big_num *const a, const big_num b)
