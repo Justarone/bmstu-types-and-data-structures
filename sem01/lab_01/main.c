@@ -349,6 +349,7 @@ big_num big_division(big_num a, big_num b)
 	// проверяем знаменатель на равенство нулю
 	if (is_zero(b.mant))
 	{
+		printf("here1");
 		res.error_code = ZERO_DIV_ERROR;
 		return res;
 	}
@@ -424,7 +425,7 @@ big_num big_division(big_num a, big_num b)
 	res.sign_m = (a.sign_m * b.sign_m) % 2;
 	res.exp_num = a.exp_num - b.exp_num + 1 + inc; // прибавка единицы связана с тем, 
 	// что мы уменьшаем порядок во время сдвига результата вправо
-	if (abs(a.exp_num - b.exp_num) > 99999) // проверка выхода степени числа за пределы области определения
+	if (res.exp_num > 99999) // проверка выхода степени числа за пределы области определения
 		res.error_code = TOO_BIG_E_ERROR;
 	return res;
 }
