@@ -15,7 +15,7 @@
 #define QUICK_SORT 1
 #define BUBBLE_SORT 2
 #define STUD_SIZE 150
-#define FILENAME "my_students_list.txt"
+#define FILENAME "my_students_listx3.txt"
 #define READ_ERROR 101
 #define STUD_LIST_ERROR 102
 #define KEYS_SORT_ERROR 103

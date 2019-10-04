@@ -90,7 +90,10 @@ int print_by_keys(const student_t *const stud_list, const int *const keys,
 const int keys_size)
 {
     if (keys_size <= 0)
+    {
+        puts("Нет студентов в списке. Попробуйте вызвать при непустом списке.");
         return SIZE_ERROR;
+    }
     printf(HAT);
     for (int i = 0; i < keys_size; i++)
     {
@@ -103,7 +106,10 @@ const int keys_size)
 int print_keys(const int *const keys, const student_t *const stud_list, const int size)
 {
     if (size <= 0)
+    {
+        puts("Список пуст. Вызовите данную опцию при непустом списке.");
         return SIZE_ERROR;
+    }
     for (int i = 0; i < size; i++)
         printf("key: %d --> index in student table: %d --> surname: %s\n\n", i + 1, keys[i] + 1, stud_list[keys[i]].surname);
     puts("\n\n");
@@ -112,29 +118,37 @@ int print_keys(const int *const keys, const student_t *const stud_list, const in
 
 int print_compare(const double *const times)
 {
+    int flag = 1;
     if (fabs(times[KEYS] + 1.0) > EPS && fabs(times[QUICK_SORT] + 1.0) > EPS)
     {
-        printf("keys quick sort: %lf;\ntable quick sort: %lf;\ndiff (keys vs quick sort table) = %lf%%", times[KEYS], \
+        printf("Быстрая сортировка ключей: %lf;\nбыстрая сортировка таблицы: %lf;\n\
+разница (ключи относительно быстрой сортировки таблицы) = %lf%%\n", times[KEYS], \
         times[QUICK_SORT], (times[QUICK_SORT] - times[KEYS]) * 100 / times[KEYS]);
-        return OK;
+        flag = 0;
     }
 
     if (fabs(times[KEYS] + 1.0) > EPS && fabs(times[BUBBLE_SORT] + 1.0) > EPS)
     {
-        printf("keys quick sort: %lf;\ntable bubble sort: %lf;\ndiff (keys vs bubble sort table) = %lf%%", times[KEYS], \
+        printf("Быстрая сортировка ключей: %lf;\nСортировка таблицы пузырьком: %lf;\n\
+разница (ключи относительно пузырька) = %lf%%\n", times[KEYS], \
         times[BUBBLE_SORT], (times[BUBBLE_SORT] - times[KEYS]) * 100 / times[KEYS]);
-        return OK;
+        flag = 0;
     }
 
     if (fabs(times[QUICK_SORT] + 1.0) > EPS && fabs(times[BUBBLE_SORT] + 1.0) > EPS)
     {
-        printf("table quick sort: %lf;\ntable bubble sort: %lf;\ndiff (quick vs bubble sorts of table) = %lf%%", times[QUICK_SORT], \
+        printf("Быстрая сортировка таблицы: %lf;\nСортировка таблицы пузырьком: %lf;\n\
+разница (быстрая сортировка таблицы относительно пузырька) = %lf%%\n", times[QUICK_SORT], \
         times[BUBBLE_SORT], (times[BUBBLE_SORT] - times[QUICK_SORT]) * 100 / times[QUICK_SORT]);
-        return OK;
+        flag = 0;
     }
-
-    puts("Для сравнения сортировок произведено недостаточно различных методов (минимум 2)!\n");
-    return TIMES_ERROR;
+    if (flag)
+    {
+        puts("Для сравнения сортировок произведено недостаточно различных методов (минимум 2)!\n");
+        return TIMES_ERROR;
+    }
+    else
+        return OK;
 }
 
 void print_by_year(const student_t *const stud_list, const int size, const int year)
@@ -156,6 +170,8 @@ void print_all(const student_t *const stud_arr, const int size)
 {
     if (size > 0)
         printf(HAT);
+    else
+        puts("В таблице нет студентов...");
     for (int i = 0; i < size; i++)
         print_student(stud_arr[i], i + 1);
 }

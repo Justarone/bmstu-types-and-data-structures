@@ -20,7 +20,7 @@
 
 static int is_bet(const char a)
 {
-    if ((a - 'A' >= 0 && a - 'Z' <= 0) || (a - 'a' >= 0 && a - 'z' <= 0) || a == '-')
+    if ((a - 'A' >= 0 && a - 'Z' <= 0) || (a - 'a' >= 0 && a - 'z' <= 0) || a == '-' || a == ' ')
         return YES;
     else 
         return NO;
@@ -83,12 +83,14 @@ int add_student(student_t *const stud_list, int *const size, FILE *const f)
     printf("Студент живет в общежитии (1) или в доме (2)? (Введите цифру): ");
     unsigned int answer;
     int sc;
+    char lb;
     while ((sc = fscanf(f, "%u", &answer)) != READED || (answer != 1 && answer != 2))
     {
         if (sc != READED)
         {
             if (sc == EOF)
                 return ADD_ERROR;
+            while (fscanf(f, "%c", &lb) == READED && lb != '\n');
             printf("Не удалось считать число. Попробуйте еще раз: ");
         }
         else
@@ -97,7 +99,7 @@ int add_student(student_t *const stud_list, int *const size, FILE *const f)
     stud_list[*size].home_type = answer & 1;
 
     int rc;
-    printf("Введите фамилию студента: ");
+    printf("Введите фамилию студента (до 40 символов): ");
     while ((rc = my_gets(stud_list[*size].surname, SURNAME_LEN, is_bet, f)) != OK)
     {   
         if (rc == EOF_ERROR)
@@ -108,7 +110,7 @@ int add_student(student_t *const stud_list, int *const size, FILE *const f)
             printf("В фамилии найден некорректный символ. Попробуйте еще раз: ");
     }
 
-    printf("Введите имя студента: ");
+    printf("Введите имя студента (до 20 символов): ");
     while ((rc = my_gets(stud_list[*size].name, NAME_LEN, is_bet, f)) != OK)
     { 
         if (rc == EOF_ERROR)
@@ -127,6 +129,7 @@ int add_student(student_t *const stud_list, int *const size, FILE *const f)
         {
             if (sc == EOF)
                 return EOF_ERROR;
+            while (fscanf(f, "%c", &lb) == READED && lb != '\n');
             printf("Не удалось считать число. Попробуйте еще раз: ");
         }
         else
@@ -141,6 +144,7 @@ int add_student(student_t *const stud_list, int *const size, FILE *const f)
         {
             if (sc == EOF)
                 return EOF_ERROR;
+            while (fscanf(f, "%c", &lb) == READED && lb != '\n');
             printf("Не удалось считать число. Попробуйте еще раз: ");
         }
         if (stud_list[*size].avg_score - 1.0 >= EPS && stud_list[*size].avg_score - 5.0 <= EPS)
@@ -156,6 +160,7 @@ int add_student(student_t *const stud_list, int *const size, FILE *const f)
         {
             if (sc == EOF)
                 return EOF_ERROR;
+            while (fscanf(f, "%c", &lb) == READED && lb != '\n');
             printf("Не удалось считать число. Попробуйте еще раз: ");
         }
         else
@@ -165,7 +170,7 @@ int add_student(student_t *const stud_list, int *const size, FILE *const f)
     
     if (stud_list[*size].home_type == HOUSE)
     {
-        printf("Введите название улицы, на которой живет студент: ");
+        printf("Введите название улицы (до 25 символов), на которой живет студент: ");
         while ((rc = my_gets(stud_list[*size].home.house.street, NAME_LEN, is_bet, f)) != OK)
         {   
             if (rc == EOF_ERROR)
@@ -177,12 +182,13 @@ int add_student(student_t *const stud_list, int *const size, FILE *const f)
         }
 
         printf("Введите номер дома студента (<10000): ");
-        while ((sc = fscanf(f, "%u", &answer)) != READED || answer > 10000)
+        while ((sc = fscanf(f, "%u", &answer)) != READED || answer < 1 || answer > 10000)
         {
             if (sc != READED)
             {
                 if (sc == EOF)
                     return EOF_ERROR;
+                while (fscanf(f, "%c", &lb) == READED && lb != '\n');
                 printf("Не удалось считать номер дома. Попробуйте еще раз: ");
             }
             else
@@ -191,12 +197,13 @@ int add_student(student_t *const stud_list, int *const size, FILE *const f)
         stud_list[*size].home.house.number = answer;
         
         printf("Введите номер квартиры студента (<1000): ");
-        while ((sc = fscanf(f, "%u", &answer)) != READED || answer > 1000)
+        while ((sc = fscanf(f, "%u", &answer)) != READED || answer < 1 || answer > 1000)
         {
             if (sc != READED)
             {
                 if (sc == EOF)
                     return EOF_ERROR;
+                while (fscanf(f, "%c", &lb) == READED && lb != '\n');
                 printf("Не удалось считать номер квартиры. Попробуйте еще раз: ");
             }
             else
@@ -208,12 +215,13 @@ int add_student(student_t *const stud_list, int *const size, FILE *const f)
     else
     {
         printf("Введите номер общежития студента (<1000): ");
-        while ((sc = fscanf(f, "%u", &answer)) != READED || answer > 1000)
+        while ((sc = fscanf(f, "%u", &answer)) != READED || answer < 1 || answer > 1000)
         {
             if (sc != READED)
             {
                 if (sc == EOF)
                     return EOF_ERROR;
+                while (fscanf(f, "%c", &lb) == READED && lb != '\n');
                 printf("Не удалось считать номер общежития. Попробуйте еще раз: ");
             }
             else
@@ -222,12 +230,13 @@ int add_student(student_t *const stud_list, int *const size, FILE *const f)
         stud_list[*size].home.dorm.number = answer;
         
         printf("Введите номер комнаты студента (<1000): ");
-        while ((sc = fscanf(f, "%u", &answer)) != READED || answer > 1000)
+        while ((sc = fscanf(f, "%u", &answer)) != READED || answer < 1 || answer > 1000)
         {
             if (sc != READED)
             {
                 if (sc == EOF)
                     return EOF_ERROR;
+                while (fscanf(f, "%c", &lb) == READED && lb != '\n');
                 printf("Не удалось считать номер комнаты. Попробуйте еще раз: ");
             }
             else
@@ -242,6 +251,11 @@ int add_student(student_t *const stud_list, int *const size, FILE *const f)
 
 int delete_student(student_t *const stud_list, int *const size, int *const keys)
 {
+    if (*size <= 0)
+    {
+        puts("Не удалось удалить студента, так как таблица пуста.\
+ Попробуйте вызвать данную опцию при непустой таблице..");
+    }
     printf("Как будем удалять: по ключу или индексу? (Введите цифру: 1 - ключ, 2 - индекс): ");
     unsigned int answer;
     int sc;
