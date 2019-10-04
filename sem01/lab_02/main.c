@@ -14,7 +14,7 @@
 #define KEYS 0
 #define QUICK_SORT 1
 #define BUBBLE_SORT 2
-#define STUD_SIZE 50
+#define STUD_SIZE 150
 #define FILENAME "my_students_list.txt"
 #define READ_ERROR 101
 #define STUD_LIST_ERROR 102
@@ -96,7 +96,7 @@ int main(void)
                     break;
                 }
                 start = clock();
-                bubble_sort_list(stud_list, list_size, sign);
+                bubble_sort_list(stud_list, keys, list_size, sign);
                 end = clock();
                 times[BUBBLE_SORT] = (double) (end - start) / CLOCKS_PER_SEC;
                 break;
@@ -108,7 +108,7 @@ int main(void)
                     break;
                 }
                 start = clock();
-                quick_sort_list(stud_list, 0, list_size - 1, sign);
+                quick_sort_list(stud_list, keys, list_size, 0, list_size - 1, sign);
                 end = clock();
                 times[QUICK_SORT] = (double) (end - start) / CLOCKS_PER_SEC;
                 break;
@@ -141,6 +141,7 @@ int main(void)
                     return STUD_LIST_ERROR;
                 for (int i = 0; i < list_size; i++)
                     keys[i] = i;
+                break;
             default:
                 puts("Ошибка: введено неверное число (попробуйте снова):\n");
                 break;

@@ -16,6 +16,7 @@
 #define LESS -1
 #define EQUAL 0
 #define MORE 1
+#define NO_INDEX -1
 
 static int is_bet(const char a)
 {
@@ -23,6 +24,14 @@ static int is_bet(const char a)
         return YES;
     else 
         return NO;
+}
+
+static int get_id_index(const int index, const int *const keys, const int size)
+{
+    for (int i = 0; i < size; i++)
+        if (keys[i] == index)
+            return i;
+    return NO_INDEX;
 }
 
 // function for my input
@@ -319,7 +328,7 @@ int delete_student(student_t *const stud_list, int *const size, int *const keys)
 // returns -1, if first argument is less than second
 // return 0, if arguments are equal
 // return 1, if first argument is bigger than second 
-static int student_cmp(student_t std1, student_t std2, const int sign)
+static int student_cmp(const student_t std1, const student_t std2, const int sign)
 {
     if (sign < 1 || sign > 8)
         return SIGN_ERROR;
@@ -332,7 +341,7 @@ static int student_cmp(student_t std1, student_t std2, const int sign)
         case 3:
             if (std1.avg_score - std2.avg_score > EPS)
                 return MORE;
-            else if (std1.avg_score - std2.avg_score < EPS)
+            else if (std2.avg_score - std1.avg_score > EPS)
                 return LESS;
             else
                 return EQUAL;
@@ -369,7 +378,7 @@ static void student_swap(student_t *const std1, student_t *const std2)
     *std2 = buf;
 }
 
-void quick_sort_list(student_t *const stud_list, const int begin, const int end, const int sign)
+void quick_sort_list(student_t *const stud_list, int *const keys, const int size, const int begin, const int end, const int sign)
 {
    if (begin < end)
     {
@@ -383,22 +392,28 @@ void quick_sort_list(student_t *const stud_list, const int begin, const int end,
             {   
                 if (student_cmp(stud_list[left], stud_list[right], sign) == MORE)
                 // Данное условие загромождает сортировку и добавляет время, но при этом делает сортировку устойчивой
+                {
                     student_swap(&stud_list[left], &stud_list[right]);
+                    int_swap(keys + get_id_index(left, keys, size), keys + get_id_index(right, keys, size));
+                }
                 left++;
                 right--;
             }
         } while (left <= right);
-        quick_sort_list(stud_list, begin, right, sign);
-        quick_sort_list(stud_list, left, end, sign);
+        quick_sort_list(stud_list, keys, size, begin, right, sign);
+        quick_sort_list(stud_list, keys, size, left, end, sign);
     }
 }
 
-void bubble_sort_list(student_t *const stud_list, const int size, const int sign)
+void bubble_sort_list(student_t *const stud_list, int *const keys, const int size, const int sign)
 {
     for (int i = 0; i < size - 1; i++)
         for (int j = 0; j < size - i - 1; j++)
             if (student_cmp(stud_list[j], stud_list[j + 1], sign) == MORE)
+            {
                 student_swap(&stud_list[j], &stud_list[j + 1]);
+                int_swap(keys + get_id_index(j, keys, size), keys + get_id_index(j + 1, keys, size));
+            }
 }
 
 void sort_by_keys(const student_t *const stud_list, int *const keys, const int begin, const int end, const int sign)

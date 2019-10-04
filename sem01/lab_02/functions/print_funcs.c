@@ -91,6 +91,7 @@ const int keys_size)
 {
     if (keys_size <= 0)
         return SIZE_ERROR;
+    printf(HAT);
     for (int i = 0; i < keys_size; i++)
     {
         // printf("key: %d --> index in students table: %d\n\n", i + 1, keys[i] + 1);
@@ -113,22 +114,22 @@ int print_compare(const double *const times)
 {
     if (fabs(times[KEYS] + 1.0) > EPS && fabs(times[QUICK_SORT] + 1.0) > EPS)
     {
-        printf("keys quick sort: %lf;\ntable quick sort: %lf;\ndiff (keys vs quick sort table) = %lf", times[KEYS], \
-        times[QUICK_SORT], (times[KEYS] - times[QUICK_SORT]) / times[KEYS]);
+        printf("keys quick sort: %lf;\ntable quick sort: %lf;\ndiff (keys vs quick sort table) = %lf%%", times[KEYS], \
+        times[QUICK_SORT], (times[QUICK_SORT] - times[KEYS]) * 100 / times[KEYS]);
         return OK;
     }
 
     if (fabs(times[KEYS] + 1.0) > EPS && fabs(times[BUBBLE_SORT] + 1.0) > EPS)
     {
-        printf("keys quick sort: %lf;\ntable bubble sort: %lf;\ndiff (keys vs bubble sort table) = %lf", times[KEYS], \
-        times[BUBBLE_SORT], (times[KEYS] - times[BUBBLE_SORT]) / times[KEYS]);
+        printf("keys quick sort: %lf;\ntable bubble sort: %lf;\ndiff (keys vs bubble sort table) = %lf%%", times[KEYS], \
+        times[BUBBLE_SORT], (times[BUBBLE_SORT] - times[KEYS]) * 100 / times[KEYS]);
         return OK;
     }
 
     if (fabs(times[QUICK_SORT] + 1.0) > EPS && fabs(times[BUBBLE_SORT] + 1.0) > EPS)
     {
-        printf("table quick sort: %lf;\ntable bubble sort: %lf;\ndiff (quick vs bubble sorts of table) = %lf", times[QUICK_SORT], \
-        times[BUBBLE_SORT], (times[QUICK_SORT] - times[BUBBLE_SORT]) / times[QUICK_SORT]);
+        printf("table quick sort: %lf;\ntable bubble sort: %lf;\ndiff (quick vs bubble sorts of table) = %lf%%", times[QUICK_SORT], \
+        times[BUBBLE_SORT], (times[BUBBLE_SORT] - times[QUICK_SORT]) * 100 / times[QUICK_SORT]);
         return OK;
     }
 
