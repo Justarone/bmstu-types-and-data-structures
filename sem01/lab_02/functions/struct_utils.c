@@ -79,6 +79,7 @@ static int strcmp_t(const char* const str1, const char *const str2)
         return LESS;
 }
 
+//========================================================================================
 int add_student(student_t *const stud_list, int *const size, FILE *const f)
 {
     printf("Студент живет в общежитии (1) или в доме (2)? (Введите цифру): ");
@@ -249,6 +250,7 @@ int add_student(student_t *const stud_list, int *const size, FILE *const f)
     puts("Запись добавлена!");
     return OK;
 }
+//=================================================================================================================
 
 int delete_student(student_t *const stud_list, int *const size, int *const keys)
 {
@@ -393,7 +395,7 @@ static void student_swap(student_t *const std1, student_t *const std2)
     *std2 = buf;
 }
 
-void quick_sort_list(student_t *const stud_list, int *const keys, const int size, const int begin, const int end, const int sign)
+void quick_sort_list(student_t *const stud_list, int *const keys, const int begin, const int end, const int sign)
 {
    if (begin < end)
     {
@@ -409,14 +411,14 @@ void quick_sort_list(student_t *const stud_list, int *const keys, const int size
                 // Данное условие загромождает сортировку и добавляет время, но при этом делает сортировку устойчивой
                 {
                     student_swap(&stud_list[left], &stud_list[right]);
-                    int_swap(keys + get_id_index(left, keys, size), keys + get_id_index(right, keys, size));
+                    int_swap(keys + left, keys + right);
                 }
                 left++;
                 right--;
             }
         } while (left <= right);
-        quick_sort_list(stud_list, keys, size, begin, right, sign);
-        quick_sort_list(stud_list, keys, size, left, end, sign);
+        quick_sort_list(stud_list, keys, begin, right, sign);
+        quick_sort_list(stud_list, keys, left, end, sign);
     }
 }
 
@@ -427,7 +429,7 @@ void bubble_sort_list(student_t *const stud_list, int *const keys, const int siz
             if (student_cmp(stud_list[j], stud_list[j + 1], sign) == MORE)
             {
                 student_swap(&stud_list[j], &stud_list[j + 1]);
-                int_swap(keys + get_id_index(j, keys, size), keys + get_id_index(j + 1, keys, size));
+                int_swap(keys + j, keys + j + 1);
             }
 }
 
@@ -455,3 +457,43 @@ void sort_by_keys(const student_t *const stud_list, int *const keys, const int b
     }
 }
 
+void sort_by_keys_bubble(keys_t *const keys, const int size)
+{
+    for (int i = 0; i < size - 1; i++)
+        for (int j = 0; j < size - i - 1; j++)
+            if (student_cmp(stud_list[keys[j]], stud_list[keys[j + 1]], sign) == MORE)
+                int_swap(keys + j, keys + j + 1);
+}
+
+
+void quick_sort_keys(keys_t *const keys const int begin, const int end)
+{
+   if (begin < end)
+    {
+        int left = begin, right = end;
+        student_t middle = keys[(left + right) / 2].year;
+        do
+        {
+            for (; keys[left].year < middle; left++);
+            for (; keys[right].year > middle; right--);
+            if (left <= right)
+            {   
+                if (keys[left].year > keys[right].year)
+                // Данное условие загромождает сортировку и добавляет время, но при этом делает сортировку устойчивой
+                    keys_swap(keys[left].year, keys[right].year);
+                left++;
+                right--;
+            }
+        } while (left <= right);
+        quick_sort_keys(keys, size, begin, right);
+        quick_sort_keys(keys, size, left, end);
+    }
+}
+
+void bubble_sort_keys(int *const keys, const int size)
+{
+    for (int i = 0; i < size - 1; i++)
+        for (int j = 0; j < size - i - 1; j++)
+            if (keys[j].year > keys[j + 1].year)
+                keys_swap(keys[j], keys[j+1]);
+}

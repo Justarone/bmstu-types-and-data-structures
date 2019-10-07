@@ -40,3 +40,9 @@ typedef struct
 } student_t;
 
 #endif
+
+typedef struct
+{
+    int key;
+    int year;
+} keys_t;
