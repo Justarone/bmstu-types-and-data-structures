@@ -40,11 +40,10 @@ int main(void)
     double times[3] = {-1, -1, -1}; // 0 - время сортировки ключей,
     // 1 - время сортировки таблицы пузырьком, 2 - время быстрой сортировки таблицы
     FILE *rfile;
-    rfile = fopen(FILENAME, "r");
-    int list_size = read_from_file(stud_list, STUD_SIZE, rfile);
-    fclose(rfile);
-    if (list_size <= 0)
-        return STUD_LIST_ERROR;
+    int list_size = 0;
+    // rfile = fopen(FILENAME, "r");
+    // list_size = read_from_file(stud_list, STUD_SIZE, rfile);
+    // fclose(rfile);
 
     for (int i = 0; i < list_size; i++)
         keys[i] = i;
@@ -64,10 +63,15 @@ int main(void)
                 break;
             case 2:
                 err_code = print_by_keys(stud_list, keys, list_size);
-                if (err_code != OK)
-                    return KEYS_ERROR;
+                // if (err_code != OK)
+                //     return KEYS_ERROR;
                 break;
             case 3:
+                if (list_size == 0)
+                {
+                    puts("Список пустой. Студентов нет");
+                    break;
+                }
                 printf("Введите год поступления, студентов которого хотите вывести: ");
                 if (scanf("%d", &year) != READED)
                 {
@@ -77,6 +81,11 @@ int main(void)
                 print_by_year(stud_list, list_size, year);
                 break;
             case 4:
+                if (list_size == 0)
+                {
+                    puts("Список пустой. Сортировать нечего.");
+                    break;
+                }
                 sign = choose_property();
                 if (sign == -1)
                 {
@@ -89,10 +98,20 @@ int main(void)
                 times[KEYS] = (double) (end - start) / CLOCKS_PER_SEC;
                 break;
             case 5:
+                if (list_size == 0)
+                {
+                    puts("Список пустой. Сортировать нечего.");
+                    break;
+                }
                 sign = choose_property();
                 if (sign == -1)
                 {
                     puts("Введен некорректный номер признака сравнения!");
+                    break;
+                }
+                if (list_size == 0)
+                {
+                    puts("Список пустой. Сортировать нечего.");
                     break;
                 }
                 start = clock();
@@ -101,6 +120,11 @@ int main(void)
                 times[BUBBLE_SORT] = (double) (end - start) / CLOCKS_PER_SEC;
                 break;
             case 6:
+                if (list_size == 0)
+                {
+                    puts("Список пустой. Сортировать нечего.");
+                    break;
+                }
                 sign = choose_property();
                 if (sign == -1)
                 {
@@ -119,6 +143,11 @@ int main(void)
                 keys[list_size - 1] = list_size - 1;
                 break;
             case 8:
+                if (list_size == 0)
+                {
+                    puts("Список пустой. Выводить нечего.");
+                    break;
+                }
                 err_code = print_keys(keys, stud_list, list_size);
                 if (err_code != OK)
                     return KEYS_ERROR;
@@ -129,6 +158,11 @@ int main(void)
                     puts("p.s.: как только будет использовано 2 вида сортировок из 3, данная опция будет доступна.");
                 break;
             case 10:
+                if (list_size == 0)
+                {
+                    puts("Список пустой. Удалять некого.");
+                    break;
+                }
                 err_code = delete_student(stud_list, &list_size, keys);
                 if (err_code != OK)
                     return DELETE_ERROR;

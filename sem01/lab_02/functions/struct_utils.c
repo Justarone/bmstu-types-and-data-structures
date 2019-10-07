@@ -17,6 +17,7 @@
 #define EQUAL 0
 #define MORE 1
 #define NO_INDEX -1
+#define NO_STUD 208
 
 static int is_bet(const char a)
 {
@@ -253,8 +254,8 @@ int delete_student(student_t *const stud_list, int *const size, int *const keys)
 {
     if (*size <= 0)
     {
-        puts("Не удалось удалить студента, так как таблица пуста.\
- Попробуйте вызвать данную опцию при непустой таблице..");
+        puts("Нет студентов в списке, выход из программы...");
+        return NO_STUD;
     }
     printf("Как будем удалять: по ключу или индексу? (Введите цифру: 1 - ключ, 2 - индекс): ");
     unsigned int answer;
