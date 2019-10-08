@@ -136,6 +136,11 @@ int main(void)
                 bubble_sort_list(stud_list, list_size, sign);
                 end = clock();
                 times[BUBBLE_SORT] = (double) (end - start) / CLOCKS_PER_SEC;
+                for (int i = 0; i < list_size; i++)
+                {
+                    keys_array[i].key = i;
+                    keys_array[i].year = stud_list[i].adm_year;
+                }
                 break;
 
             case 7:
@@ -154,6 +159,11 @@ int main(void)
                 quick_sort_list(stud_list, 0, list_size - 1, sign);
                 end = clock();
                 times[QUICK_SORT] = (double) (end - start) / CLOCKS_PER_SEC;
+                for (int i = 0; i < list_size; i++)
+                {
+                    keys_array[i].key = i;
+                    keys_array[i].year = stud_list[i].adm_year;
+                }
                 break;
 
             case 8:
