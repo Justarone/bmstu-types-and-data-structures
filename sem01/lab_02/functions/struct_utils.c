@@ -27,14 +27,6 @@ static int is_bet(const char a)
         return NO;
 }
 
-static int get_id_index(const int index, const int *const keys, const int size)
-{
-    for (int i = 0; i < size; i++)
-        if (keys[i] == index)
-            return i;
-    return NO_INDEX;
-}
-
 // function for my input
 static int my_gets(char *const buf, const int buf_size, int (*check)(const char), FILE *const stream)
 {
@@ -77,6 +69,13 @@ static int strcmp_t(const char* const str1, const char *const str2)
         return EQUAL;
     else 
         return LESS;
+}
+
+void keys_swap(keys_t *const key1, keys_t *const key2)
+{
+    keys_t tmp = *key1;
+    *key1 = *key2;
+    *key2 = tmp;
 }
 
 //========================================================================================
@@ -252,82 +251,31 @@ int add_student(student_t *const stud_list, int *const size, FILE *const f)
 }
 //=================================================================================================================
 
-int delete_student(student_t *const stud_list, int *const size, int *const keys)
+int delete_student(student_t *const stud_list, int *const size)
 {
     if (*size <= 0)
     {
         puts("Нет студентов в списке, выход из программы...");
         return NO_STUD;
     }
-    printf("Как будем удалять: по ключу или индексу? (Введите цифру: 1 - ключ, 2 - индекс): ");
-    unsigned int answer;
+    print_all(stud_list, *size);
+    puts("Введите индекс студента, которого хотите удалить: ");
+    int index;
     int sc;
-
-    while ((sc = scanf("%u", &answer)) != READED || (answer != 1 && answer != 2))
+    while ((sc = scanf("%d", &index)) != READED || index <= 0 || index > *size)
     {
         if (sc != READED)
             printf("Не удалось считать число. Попробуйте еще раз: ");
         else
-            printf("Не удалось распознать 1 или 2 в вводе. Попробуйте еще раз: ");
+            printf("Неверный индекс. Попробуйте еще раз: ");
     }
 
-    if (answer == 1)
-    {
-        print_by_keys(stud_list, keys, *size);
-        printf("Введите номер ключа, по которому хотите удалить: ");
-        int key_i;
-        while ((scanf("%d", &key_i)) != READED || key_i <= 0 || key_i > *size)
-        {
-            if (sc != READED)
-                printf("Не удалось считать число. Попробуйте еще раз: ");
-            else
-                printf("Неверный номер ключа. Попробуйте еще раз: ");
-        }
+    index--;
+    for (int i = index; i < *size - 1; i++)
+        stud_list[i] = stud_list[i + 1];
 
-        key_i--;
-        int index = keys[key_i];
-
-        for (int i = index; i < *size - 1; i++)
-            stud_list[i] = stud_list[i + 1];
-
-        for (int i = key_i; i < *size - 1; i++)
-            keys[i] = keys[i + 1];
-
-        for (int i = 0; i < *size - 1; i++)
-            if (keys[i] > index)
-                keys[i]--;
-
-        (*size)--;
-        puts("Студент успешно убран из списка.\n");
-    }
-    
-    else
-    {
-        print_all(stud_list, *size);
-        puts("Введите индекс студента, которого хотите удалить: ");
-        int index;
-        
-        while ((sc = scanf("%d", &index)) != READED || index <= 0 || index > *size)
-        {
-            if (sc != READED)
-                printf("Не удалось считать число. Попробуйте еще раз: ");
-            else
-                printf("Неверный индекс. Попробуйте еще раз: ");
-        }
-
-        index--;
-        int i;
-
-        for (int i = index; i < *size - 1; i++)
-            stud_list[i] = stud_list[i + 1];
-        
-        for (int i = 0; keys[i] != index; i++);
-        for (; i < *size - 1; i++)
-            keys[i] = keys[i + 1];
-
-        (*size)--;
-        puts("Cтудент успешно убран из списка!\n");
-    }
+    (*size)--;
+    puts("Cтудент успешно убран из списка!\n");
     return OK;
 }
 
@@ -381,13 +329,6 @@ static int student_cmp(const student_t std1, const student_t std2, const int sig
     return OK;
 }
 
-static void int_swap(int *const a, int *const b)
-{
-    int c = *a;
-    *a = *b;
-    *b = c;
-}
-
 static void student_swap(student_t *const std1, student_t *const std2)
 {
     student_t buf = *std1;
@@ -395,7 +336,7 @@ static void student_swap(student_t *const std1, student_t *const std2)
     *std2 = buf;
 }
 
-void quick_sort_list(student_t *const stud_list, int *const keys, const int begin, const int end, const int sign)
+void quick_sort_list(student_t *const stud_list, const int begin, const int end, const int sign)
 {
    if (begin < end)
     {
@@ -409,69 +350,30 @@ void quick_sort_list(student_t *const stud_list, int *const keys, const int begi
             {   
                 if (student_cmp(stud_list[left], stud_list[right], sign) == MORE)
                 // Данное условие загромождает сортировку и добавляет время, но при этом делает сортировку устойчивой
-                {
                     student_swap(&stud_list[left], &stud_list[right]);
-                    int_swap(keys + left, keys + right);
-                }
                 left++;
                 right--;
             }
         } while (left <= right);
-        quick_sort_list(stud_list, keys, begin, right, sign);
-        quick_sort_list(stud_list, keys, left, end, sign);
+        quick_sort_list(stud_list, begin, right, sign);
+        quick_sort_list(stud_list, left, end, sign);
     }
 }
 
-void bubble_sort_list(student_t *const stud_list, int *const keys, const int size, const int sign)
+void bubble_sort_list(student_t *const stud_list, const int size, const int sign)
 {
     for (int i = 0; i < size - 1; i++)
         for (int j = 0; j < size - i - 1; j++)
             if (student_cmp(stud_list[j], stud_list[j + 1], sign) == MORE)
-            {
                 student_swap(&stud_list[j], &stud_list[j + 1]);
-                int_swap(keys + j, keys + j + 1);
-            }
 }
 
-void sort_by_keys(const student_t *const stud_list, int *const keys, const int begin, const int end, const int sign)
-{
-    if (begin < end)
-    {
-        int left = begin, right = end;
-        int middle = keys[(left + right) / 2];
-        do
-        {
-            for (; student_cmp(stud_list[keys[left]], stud_list[middle], sign) == LESS; left++);
-            for (; student_cmp(stud_list[keys[right]], stud_list[middle], sign) == MORE; right--);
-            if (left <= right)
-            {   
-                if (student_cmp(stud_list[keys[left]], stud_list[keys[right]], sign) == MORE)
-                // Данное условие загромождает сортировку и добавляет время, но при этом делает сортировку устойчивой
-                    int_swap(keys + left, keys + right);
-                left++;
-                right--;
-            }
-        } while (left <= right);
-        sort_by_keys(stud_list, keys, begin, right, sign);
-        sort_by_keys(stud_list, keys, left, end, sign);
-    }
-}
-
-void sort_by_keys_bubble(keys_t *const keys, const int size)
-{
-    for (int i = 0; i < size - 1; i++)
-        for (int j = 0; j < size - i - 1; j++)
-            if (student_cmp(stud_list[keys[j]], stud_list[keys[j + 1]], sign) == MORE)
-                int_swap(keys + j, keys + j + 1);
-}
-
-
-void quick_sort_keys(keys_t *const keys const int begin, const int end)
+void quick_sort_keys(keys_t *const keys, const int begin, const int end)
 {
    if (begin < end)
     {
         int left = begin, right = end;
-        student_t middle = keys[(left + right) / 2].year;
+        int middle = keys[(left + right) / 2].year;
         do
         {
             for (; keys[left].year < middle; left++);
@@ -480,20 +382,20 @@ void quick_sort_keys(keys_t *const keys const int begin, const int end)
             {   
                 if (keys[left].year > keys[right].year)
                 // Данное условие загромождает сортировку и добавляет время, но при этом делает сортировку устойчивой
-                    keys_swap(keys[left].year, keys[right].year);
+                    keys_swap(&keys[left], &keys[right]);
                 left++;
                 right--;
             }
         } while (left <= right);
-        quick_sort_keys(keys, size, begin, right);
-        quick_sort_keys(keys, size, left, end);
+        quick_sort_keys(keys, begin, right);
+        quick_sort_keys(keys, left, end);
     }
 }
 
-void bubble_sort_keys(int *const keys, const int size)
+void bubble_sort_keys(keys_t *const keys, const int size)
 {
     for (int i = 0; i < size - 1; i++)
         for (int j = 0; j < size - i - 1; j++)
             if (keys[j].year > keys[j + 1].year)
-                keys_swap(keys[j], keys[j+1]);
+                keys_swap(&keys[j], &keys[j+1]);
 }

@@ -11,9 +11,10 @@
 
 #define OK 0
 #define READED 1
-#define KEYS 0
 #define QUICK_SORT 1
 #define BUBBLE_SORT 2
+#define QUICK_KEYS 0
+#define BUBBLE_KEYS 3
 #define STUD_SIZE 150
 #define FILENAME "my_students_listx3.txt"
 #define READ_ERROR 101
@@ -34,20 +35,13 @@ int main(void)
     int year;
 
     student_t stud_list[STUD_SIZE];
-    int keys[STUD_SIZE];
     int err_code = 0;
     clock_t start, end;
-    double times[3] = {-1, -1, -1}; // 0 - время сортировки ключей,
+    double times[4] = {-1, -1, -1, -1}; // 0 - время сортировки ключей,
     // 1 - время сортировки таблицы пузырьком, 2 - время быстрой сортировки таблицы
     FILE *rfile;
     int list_size = 0;
     keys_t keys_array[STUD_SIZE];
-    // rfile = fopen(FILENAME, "r");
-    // list_size = read_from_file(stud_list, STUD_SIZE, rfile);
-    // fclose(rfile);
-
-    // for (int i = 0; i < list_size; i++)
-    //     keys[i] = i;
 
     print_menu();
     while (scanf("%d", &choice) != READED)
@@ -61,13 +55,21 @@ int main(void)
                 return OK;
                 
             case 1:
+                if (list_size == 0)
+                {
+                    puts("Список пустой. Печатать нечего.");
+                    break;
+                }
                 print_all(stud_list, list_size);
                 break;
 
             case 2:
-                err_code = print_by_keys(stud_list, keys, list_size);
-                // if (err_code != OK)
-                //     return KEYS_ERROR;
+                if (list_size == 0)
+                {
+                    puts("Список пустой. Печатать нечего.");
+                    break;
+                }
+                print_keys_array(keys_array, list_size);
                 break;
 
             case 3:
@@ -91,16 +93,10 @@ int main(void)
                     puts("Список пустой. Сортировать нечего.");
                     break;
                 }
-                sign = choose_property();
-                if (sign == -1)
-                {
-                    puts("Введен некорректный номер признака сравнения!");
-                    break;
-                }
                 start = clock();
-                sort_by_keys(stud_list, keys, 0, list_size - 1, sign);
+                quick_sort_keys(keys_array, 0, list_size - 1);
                 end = clock();
-                times[KEYS] = (double) (end - start) / CLOCKS_PER_SEC;
+                times[QUICK_KEYS] = (double) (end - start) / CLOCKS_PER_SEC;
                 break;
 
             case 5:
@@ -109,23 +105,10 @@ int main(void)
                     puts("Список пустой. Сортировать нечего.");
                     break;
                 }
-                sign = choose_property();
-                if (sign == -1)
-                {
-                    puts("Введен некорректный номер признака сравнения!");
-                    break;
-                }
-                if (list_size == 0)
-                {
-                    puts("Список пустой. Сортировать нечего.");
-                    break;
-                }
-                for (int i = 0; i < list_size; i++)
-                    keys[i] = i;
                 start = clock();
-                bubble_sort_list(stud_list, keys, list_size, sign);
+                bubble_sort_keys(keys_array, list_size);
                 end = clock();
-                times[BUBBLE_SORT] = (double) (end - start) / CLOCKS_PER_SEC;
+                times[BUBBLE_KEYS] = (double) (end - start) / CLOCKS_PER_SEC;
                 break;
 
             case 6:
@@ -140,36 +123,47 @@ int main(void)
                     puts("Введен некорректный номер признака сравнения!");
                     break;
                 }
-                for (int i = 0; i < list_size; i++)
-                    keys[i] = i;
+                if (list_size == 0)
+                {
+                    puts("Список пустой. Сортировать нечего.");
+                    break;
+                }
                 start = clock();
-                quick_sort_list(stud_list, keys, list_size, 0, list_size - 1, sign);
+                bubble_sort_list(stud_list, list_size, sign);
+                end = clock();
+                times[BUBBLE_SORT] = (double) (end - start) / CLOCKS_PER_SEC;
+                break;
+
+            case 7:
+                if (list_size == 0)
+                {
+                    puts("Список пустой. Сортировать нечего.");
+                    break;
+                }
+                sign = choose_property();
+                if (sign == -1)
+                {
+                    puts("Введен некорректный номер признака сравнения!");
+                    break;
+                }
+                start = clock();
+                quick_sort_list(stud_list, 0, list_size - 1, sign);
                 end = clock();
                 times[QUICK_SORT] = (double) (end - start) / CLOCKS_PER_SEC;
                 break;
 
-            case 7:
+            case 8:
                 err_code = add_student(stud_list, &list_size, stdin);
                 if (err_code != OK)
                     return ADDITION_ERROR;
-                keys[list_size - 1] = list_size - 1;
-                break;
-
-            case 8:
-                if (list_size == 0)
-                {
-                    puts("Список пустой. Выводить нечего.");
-                    break;
-                }
-                err_code = print_keys(keys, stud_list, list_size);
-                if (err_code != OK)
-                    return KEYS_ERROR;
+                keys_array[list_size - 1].key = list_size - 1;
+                keys_array[list_size - 1].year = stud_list[list_size - 1].adm_year;
                 break;
 
             case 9:
                 err_code = print_compare(times);
                 if (err_code != OK)
-                    puts("p.s.: как только будет использовано 2 вида сортировок из 3, данная опция будет доступна.");
+                    puts("p.s.: как только будет использовано 2 вида сортировок из 4, данная опция будет доступна.");
                 break;
 
             case 10:
@@ -178,9 +172,14 @@ int main(void)
                     puts("Список пустой. Удалять некого.");
                     break;
                 }
-                err_code = delete_student(stud_list, &list_size, keys);
+                err_code = delete_student(stud_list, &list_size);
                 if (err_code != OK)
                     return DELETE_ERROR;
+                for (int i = 0; i < list_size; i++)
+                {
+                    keys_array[i].key = i;
+                    keys_array[i].year = stud_list[i].adm_year;
+                }
                 break;
 
             case 11:
@@ -191,41 +190,9 @@ int main(void)
                     return STUD_LIST_ERROR;
                 for (int i = 0; i < list_size; i++)
                 {
-                    keys[i] = i;
                     keys_array[i].key = i;
                     keys_array[i].year = stud_list[i].adm_year;
                 }
-                break;
-
-            case 12:
-                if (list_size == 0)
-                {
-                    puts("Список пустой. Сортировать нечего.");
-                    break;
-                }
-                quick_sort_keys(keys, 0, list_size - 1);
-                break;
-
-            case 13:
-                if (list_size == 0)
-                {
-                    puts("Список пустой. Сортировать нечего.");
-                    break;
-                }
-                bubble_sort_keys(keys, list_size);
-                break;
-
-            case 14:
-                if (list_size == 0)
-                {
-                    puts("Список пустой. Сортировать нечего.");
-                    break;
-                }
-
-
-
-            default:
-                puts("Ошибка: введено неверное число (попробуйте снова):\n");
                 break;
         }
         print_menu();
