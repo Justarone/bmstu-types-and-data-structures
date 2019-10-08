@@ -9,4 +9,6 @@ int print_compare(const double *const times); // Error when less than 2 "times" 
 void print_by_year(const student_t *const stud_list, const int size, const int year);
 void print_all(const student_t *const stud_arr, const int size);
 void print_keys_array(const keys_t *const key_array, const int size);
+void print_table_by_keys(const keys_t *const key_array, const student_t *const stud_list, const int size);
+
 #endif

@@ -58,7 +58,8 @@ void print_menu(void)
         "8. Ввод нового студента;\n"
         "9. Вывод результатов сравнения алгоритмов сортировок;\n"
         "10. Удаление студента;\n"
-        "11. Выгрузка списка студентов из файла;\n\n"
+        "11. Выгрузка списка студентов из файла;\n"
+        "12. Вывод списка студента по ключам;\n\n"
         "Ввод: "
     );
 }
@@ -161,4 +162,11 @@ void print_keys_array(const keys_t *const key_array, const int size)
     for (int i = 0; i < size; i++)
         printf("key: %d ----> year: %d\n", key_array[i].key + 1, key_array[i].year);
     puts("\n");
+}
+
+void print_table_by_keys(const keys_t *const key_array, const student_t *const stud_list, const int size)
+{
+    printf(HAT);
+    for (int i = 0; i < size; i++)
+        print_student(stud_list[key_array[i].key], key_array[i].key + 1);
 }

@@ -45,7 +45,11 @@ int main(void)
 
     print_menu();
     while (scanf("%d", &choice) != READED)
+    {
         puts("Введено не число, попробуйте снова:");
+        char c;
+        while (scanf("%c", &c) == READED && c != '\n');
+    }
     while (1)
     {
         switch (choice)
@@ -194,10 +198,24 @@ int main(void)
                     keys_array[i].year = stud_list[i].adm_year;
                 }
                 break;
+
+            case 12:
+                if (list_size == 0)
+                {
+                    puts("Список пустой. Печатать нечего.");
+                    break;
+                }
+                print_table_by_keys(keys_array, stud_list, list_size);
+                break;
+            
         }
         print_menu();
         while (scanf("%d", &choice) != READED)
+        {
             puts("Введено не число, попробуйте снова:");
+            char c;
+            while (scanf("%c", &c) == READED && c != '\n');
+        }
     }
     return OK;
 }
