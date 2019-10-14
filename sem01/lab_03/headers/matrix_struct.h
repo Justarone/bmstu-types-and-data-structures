@@ -11,22 +11,29 @@ typedef struct
     int data[MAX_SIZE_MATRIX][MAX_SIZE_MATRIX];
 } matrix_std;
 
-// I want to make this more universal, so the list can store either row pointers or column ones
 typedef struct
 {
     l_list_elem *next;
-    int value; // here is the value of the first elem of row (or column)
-    int *colrow; // it means, that here can be either pointer on columns, or on rows
+    int index;  // It's not rational for me to use the real pointer cause I need to get both characterics (value and column)
 } l_list_elem;
 
 typedef struct
 {
     int rows;
     int columns;
+    int quantity;
     int value[MAX_MATRIX_ELEMS];
-    int rowcol[MAX_MATRIX_ELEMS]; // so, first idea is that this array store rows of value's 
-    // but it's better to transpose in the same type (i think, because you have matrix_t = trans(matrix_t))
-    l_list_elem pointers[MAX_SIZE_MATRIX];
+    int row[MAX_MATRIX_ELEMS]; 
+    l_list_elem pointer[MAX_SIZE_MATRIX + 1];
 } matrix_t;
+
+typedef struct
+{
+    int size;
+    int quantity;
+    int values[MAX_MATRIX_ELEMS];
+    int positions[MAX_MATRIX_ELEMS];
+} vector_t;
+
 
 #endif
