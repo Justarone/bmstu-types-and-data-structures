@@ -24,7 +24,7 @@ int multiply_t(const matrix_t *const matrix, const matrix_t *const factor,
     for (int i = 0; i < factor->quantity; i++)
         ip_factor[factor->row[i]] = i; // so, our vector shouldn't be ordered,
     // so we need ip array to get position value for O(1)
-
+    int pos;
     l_list_elem pointer = matrix->pointer[0];
     int cur_col = 0;
     /* the multiplication algorithm is:
@@ -54,9 +54,19 @@ int multiply_t(const matrix_t *const matrix, const matrix_t *const factor,
                 // define it and put the result
                 if (ip_res[matrix->row[i]] == -1)
                 {
-                    ip_res[matrix->row[i]] = res->quantity;
-                    res->row[res->quantity] = matrix->row[i];
-                    res->value[res->quantity] =
+                    // the place for the insertion should be found correctly (so the list of
+                    // rows should be sorted)
+                    // FIND POS CYCLE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    for (pos = res->quantity; matrix->row[i] > res->row[pos - 1] && pos > 0; pos--)
+                        ;
+                    ip_res[matrix->row[i]] = pos;
+                    for (int i = res->quantity; i > pos; i--)
+                    {
+                        res->value[i] = res->value[i - 1];
+                        res->row[i] = res->row[i - 1];
+                    }
+                    res->row[pos] = matrix->row[i];
+                    res->value[pos] =
                         factor->value[ip_factor[cur_col]] * matrix->value[i];
                     res->quantity++;
                     res->pointer->next->index++;
