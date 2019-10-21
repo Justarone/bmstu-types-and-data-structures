@@ -14,7 +14,10 @@ int create_matrix_t(matrix_t *const matrix, const int rows, const int columns)
     matrix->rows = rows;
     matrix->columns = columns;
     for (int i = 0; i < rows; i++)
+    {
         matrix->pointer[i].next = &matrix->pointer[i + 1];
+        matrix->pointer[i].index = 0;
+    }
     matrix->pointer[rows].next = NULL;
     return OK;
 }
@@ -94,6 +97,15 @@ void insert_elem(matrix_t *const matrix, const int i, const int j, const int val
 int input_matrix_t(matrix_t *const matrix, FILE *const stream, const int count)
 {
     // input of nonzero elements count
+    for (int i = 0; i < matrix->columns + 1; i++)
+        matrix->pointer[i].index = 0;
+
+    // this cycle is not neccecary, just for the nulled arrays
+    for (int i = 0; i < matrix->quantity; i++)
+    {
+        matrix->value[i] = 0;
+        matrix->row[i] = 0;
+    }
     int triple[3]; // array for triples = { row, column, value }
     if (count <= 0 || count >= MAX_MATRIX_ELEMS)
         return COUNT_ERROR;
@@ -116,6 +128,10 @@ void convert_matrix(const matrix_t *const source, matrix_std *const target)
 {
     target->rows = source->rows;
     target->columns = source->columns;
+
+    for (int i = 0; i < target->rows; i++)
+        for (int j = 0; j < target->columns; j++)
+            target->data[i][j] = 0;
 
     l_list_elem pointer = source->pointer[0];
     int cur_col = 0;

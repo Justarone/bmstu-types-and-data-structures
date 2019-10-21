@@ -78,13 +78,12 @@ int multiply_t(const matrix_t *const matrix, const matrix_t *const factor,
 int multiply_std(const matrix_std *const matrix, const matrix_std *const factor,
                  matrix_std *const res)
 {
-    if (matrix->columns != factor->rows || matrix->rows != res->rows ||
-        factor->rows != 1 || factor->columns != 1)
+    if (matrix->columns != factor->rows || matrix->rows != res->rows)
         return MULT_ERROR;
 
     for (int i = 0; i < matrix->rows; i++)
         for (int j = 0; j < matrix->columns; j++)
-            res->data[j][0] = matrix->data[i][j] * factor->data[i][0];
+            res->data[j][0] += matrix->data[j][i] * factor->data[i][0];
     return OK;
 }
 
