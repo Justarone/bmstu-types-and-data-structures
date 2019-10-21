@@ -1,4 +1,6 @@
 *.out
 test*
 *.exe
-*odt#
+*odt
+*.o
+*.d

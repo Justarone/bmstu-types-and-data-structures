@@ -11,10 +11,10 @@ typedef struct
     int data[MAX_SIZE_MATRIX][MAX_SIZE_MATRIX];
 } matrix_std;
 
-typedef struct
+typedef struct l_list_elem
 {
-    l_list_elem *next;
     int index; // It's not rational for me to use the real pointer cause I need to get both characterics (value and column)
+    struct l_list_elem *next;
 } l_list_elem;
 
 typedef struct

@@ -7,12 +7,15 @@
 #define READED 1
 #define TRIPLE_READED 3
 
-int create_matrix(matrix_t *const matrix, const int rows, const int columns)
+int create_matrix_t(matrix_t *const matrix, const int rows, const int columns)
 {
     if (rows <= 0 || columns <= 0 || rows > MAX_SIZE_MATRIX || columns > MAX_SIZE_MATRIX)
         return SIZE_ERROR;
     matrix->rows = rows;
     matrix->columns = columns;
+    for (int i = 0; i < rows; i++)
+        matrix->pointer[i].next = &matrix->pointer[i + 1];
+    matrix->pointer[rows].next = NULL;
     return OK;
 }
 
@@ -39,6 +42,11 @@ int input_matrix_std(matrix_std *const matrix, FILE *const stream, const int cou
         if (fscanf(stream, "%d%d%d", triple, triple + 1, triple + 2) != TRIPLE_READED ||
             triple[0] >= matrix->rows || triple[1] >= matrix->columns)
             return READ_ERROR;
+        if (triple[2] == 0)
+        {
+            i--;
+            continue;
+        }
         matrix->data[triple[0]][triple[1]] = triple[2];
     }
     return OK;
@@ -46,7 +54,7 @@ int input_matrix_std(matrix_std *const matrix, FILE *const stream, const int cou
 
 void ins_elem_in_list(matrix_t *const matrix, const int index, const int value, const int row)
 {
-    for (int i = index; i < matrix->quantity; i++)
+    for (int i = matrix->quantity - 1; i >= index; i--)
     {
         matrix->value[i + 1] = matrix->value[i];
         matrix->row[i + 1] = matrix->row[i];
@@ -55,7 +63,7 @@ void ins_elem_in_list(matrix_t *const matrix, const int index, const int value, 
     matrix->row[index] = row;
 }
 
-void insert_elem_t(matrix_t *const matrix, const int i, const int j, const int value)
+void insert_elem(matrix_t *const matrix, const int i, const int j, const int value)
 {
     // current index is chosen as the first
     // index of the column and since here we are looking for the insertion place
@@ -63,11 +71,11 @@ void insert_elem_t(matrix_t *const matrix, const int i, const int j, const int v
     // if we reached the next
     // column or our row became less than the previous row (so if we reached the
     // condition then we find index for insertion)
-    while (cur_index <= matrix->pointer[j].next->index &&
+    while (cur_index < matrix->pointer[j].next->index &&
            matrix->row[cur_index] < i)
         cur_index++;
 
-    if (matrix->row[cur_index] = i)
+    if (matrix->row[cur_index] == i && cur_index < matrix->pointer[j].next->index)
     {
         matrix->value[cur_index] = value;
         return;
@@ -94,6 +102,11 @@ int input_matrix_t(matrix_t *const matrix, FILE *const stream, const int count)
         if (fscanf(stream, "%d%d%d", triple, triple + 1, triple + 2) != TRIPLE_READED ||
             triple[0] >= matrix->rows || triple[1] >= matrix->columns)
             return READ_ERROR;
+        if (triple[2] == 0)
+        {
+            i--;
+            continue;
+        }
         insert_elem(matrix, triple[0], triple[1], triple[2]);
     }
     return OK;
@@ -110,9 +123,13 @@ void convert_matrix(const matrix_t *const source, matrix_std *const target)
     {
         for (int i = pointer.index; i < pointer.next->index; i++)
             target->data[source->row[i]][cur_col] = source->value[i];
+        pointer = *pointer.next;
+        cur_col++;
     }
 }
 
+// debug functions
+// ======================================================================
 void print_matrix(const matrix_std *const matrix, FILE *const stream)
 {
     for (int i = 0; i < matrix->rows; i++)
@@ -122,3 +139,25 @@ void print_matrix(const matrix_std *const matrix, FILE *const stream)
         fprintf(stream, "\n\n");
     }
 }
+
+void transpose_print(const matrix_t *const matrix, FILE *const stream)
+{
+    l_list_elem pointer = matrix->pointer[0];
+    while (pointer.next)
+    {
+        for (int i = 0; i < matrix->rows; i++)
+        {
+            if (pointer.index < pointer.next->index &&
+                matrix->row[pointer.index] == i)
+            {
+                fprintf(stream, "%3d ", matrix->value[pointer.index]);
+                pointer.index++;
+            }
+            else
+                fprintf(stream, "%3d ", 0);
+        }
+        fprintf(stream, "\n");
+        pointer = *pointer.next;
+    }
+}
+// =======================================================================

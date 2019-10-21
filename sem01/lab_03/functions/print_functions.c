@@ -43,6 +43,6 @@ void print_times(const clock_t *const times)
                (double)times[CLASSIC] / CLOCKS_PER_SEC);
 
     if (times[CLASSIC] != -1 && times[SPECIAL] != -1)
-        printf("Разница между методами: %lf\%",
+        printf("Разница между методами: %lf%%",
                (double)100 * (times[CLASSIC] - times[SPECIAL]) / times[CLASSIC]);
 }

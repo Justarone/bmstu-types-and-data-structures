@@ -1,5 +1,4 @@
-#include "../headers/multiplying.h"
-#include "../headers/matrix_struct.h"
+#include "multiplying.h"
 
 #define OK 0
 #define MULT_ERROR -1
@@ -18,7 +17,7 @@ int multiply_t(const matrix_t *const matrix, const matrix_t *const factor,
     // initialization of ip arrays
     for (int i = 0; i < matrix->rows; i++)
         ip_res[i] = -1;
-    for (int i = 0; i < factor->columns; i++)
+    for (int i = 0; i < factor->rows; i++)
         ip_factor[i] = -1;
 
     // setting up the ip_factor array using vector
@@ -46,7 +45,7 @@ int multiply_t(const matrix_t *const matrix, const matrix_t *const factor,
     {
         // if the element from the factor vector is not zero
         // (with which we are going to multiply our matrix column)
-        if (ip_factor[cur_col])
+        if (ip_factor[cur_col] != -1)
         {
             // explore all elements from the column of our matrixf
             for (int i = pointer.index; i < pointer.next->index; i++)
@@ -60,6 +59,7 @@ int multiply_t(const matrix_t *const matrix, const matrix_t *const factor,
                     res->value[res->quantity] =
                         factor->value[ip_factor[cur_col]] * matrix->value[i];
                     res->quantity++;
+                    res->pointer->next->index++;
                 }
                 // if the sum position defined in res matrix - update value
                 else
@@ -75,10 +75,11 @@ int multiply_t(const matrix_t *const matrix, const matrix_t *const factor,
     return OK;
 }
 
-int multiply_std(const matrix_std *const matrix, const matrix_std *const factor, matrix_std *const res)
+int multiply_std(const matrix_std *const matrix, const matrix_std *const factor,
+                 matrix_std *const res)
 {
     if (matrix->columns != factor->rows || matrix->rows != res->rows ||
-    factor->rows != 1 || factor->columns != 1)
+        factor->rows != 1 || factor->columns != 1)
         return MULT_ERROR;
 
     for (int i = 0; i < matrix->rows; i++)
@@ -86,9 +87,6 @@ int multiply_std(const matrix_std *const matrix, const matrix_std *const factor,
             res->data[j][0] = matrix->data[i][j] * factor->data[i][0];
     return OK;
 }
-
-
-
 
 //     // the main condition that allows us to multiply matrices (sizes check)
 //     if (matrix->columns != factor->size || matrix->rows != res->size)

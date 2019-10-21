@@ -1,6 +1,6 @@
-FLAGS = -Wall -Werror -std=c99 -pedantic -g
-FILES = $(wildcard *.c functions/*.c)
-HDRS_DIR = ../headers/
+FLAGS = -Wall -Werror -std=c99 -g -MD
+FILES = $(wildcard functions/*.c *.c)
+HDRS_DIR = headers/
 CC = gcc
 
 .PHONY: clean all run
@@ -13,13 +13,13 @@ app.exe: $(subst .c,.o,$(FILES))
 run: app.exe
 	./app.exe
 
-%.o: %.c
-	$(CC) -o $@ -I $(HDRS_DIR) $(FLAGS) $@
-
 functions/%.o: functions/%.c
-	$(CC) -o $@ -I $(HDRS_DIR) $(FLAGS) $@
+	$(CC) -c -o $@ -I $(HDRS_DIR) $(FLAGS) $<
+
+%.o: %.c
+	$(CC) -c -o $@ -I headers/ $(FLAGS) $<
 
 clean:
-	rm -rf *.exe *.d *.o
+	rm -f *.exe *.d *.o functions/*.o functions/*.d
 
 include $(wildcard functions/*.d *.d)
