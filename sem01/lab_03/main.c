@@ -64,35 +64,35 @@ int main(void)
                    "(введите цифру от 1 до 3: 1 - 50х50, 2 - 400x400, 3 - 1000x1000): ");
             if (scanf("%d", &answer) != READED || answer < 1 || answer > 3)
             {
-                printf("Ошибка! Введено неверное значение. Завершение программы.");
-                return INPUT_ERROR;
+                printf("Ошибка! Введено неверное значение. Выход в меню.\n\n");
+                goto read_label;
             }
             count = sizes[answer - 1] * sizes[answer - 1];
             if (create_matrix_t(&matrix1, sizes[answer - 1], sizes[answer - 1]) ||
                 create_matrix_std(&matrix2, sizes[answer - 1], sizes[answer - 1]))
             {
-                printf("Проблемы с созданием матрицы. Выход из программы.");
-                return INPUT_ERROR;
+                printf("Проблемы с созданием матрицы. Выход в меню.\n\n");
+                goto read_label;
             }
 
             f = fopen(filenames[answer - 1], "r");
             if (!f)
             {
-                printf("Проблемы с открытием файла. Завершение программы.");
-                return INPUT_ERROR;
+                printf("Проблемы с открытием файла. Выход в меню.\n\n");
+                goto read_label;
             }
             printf("\nВведите процент заполненности (от 1 до 100): ");
             if (scanf("%d", &answer) != READED || answer < 1 || answer > 100)
             {
-                printf("Ошибка! Введено неверное значение. Завершение программы.");
-                return INPUT_ERROR;
+                printf("Ошибка! Введено неверное значение. Выход в меню.\n\n");
+                goto read_label;
             }
 
             count = count * answer / 100;
             if (input_matrix_t(&matrix1, f, count))
             {
-                printf("Ошибка заполнения матрицы. Выход из программы.");
-                return INPUT_ERROR;
+                printf("Ошибка заполнения матрицы. Выход в меню.\n\n");
+                goto read_label;
             }
             fclose(f);
             convert_matrix(&matrix1, &matrix2);
@@ -107,31 +107,31 @@ int main(void)
             if (scanf("%d%d", user_sizes, user_sizes + 1) != READED * 2 || user_sizes[0] <= 0 ||
                 user_sizes[0] > MAX_SIZE_MATRIX || user_sizes[1] > MAX_SIZE_MATRIX || user_sizes[1] <= 0)
             {
-                printf("Размеры введены неверно, выход из программы.");
-                return INPUT_ERROR;
+                printf("Размеры введены неверно, выход в меню.\n\n");
+                goto read_label;
             }
 
             count = user_sizes[0] * user_sizes[1];
             if (create_matrix_t(&matrix1, user_sizes[0], user_sizes[1]))
             {
-                printf("Проблемы с созданием матрицы. Выход из программы.");
-                return INPUT_ERROR;
+                printf("Проблемы с созданием матрицы. Выход в меню.\n\n");
+                goto read_label;
             }
 
             printf("\nВведите количество элементов матрицы (от 1 до максимального кол-ва): ");
             if (scanf("%d", &count) != READED || count > user_sizes[0] * user_sizes[1] ||
                 count <= 0)
             {
-                printf("Ошибка! Введено неверное количество. Завершение программы.");
-                return INPUT_ERROR;
+                printf("Ошибка! Введено неверное количество. Выход в меню.\n\n");
+                goto read_label;
             }
             printf("Ввод матрицы выполняется тройками: \"ряд столбец значение\".\n"
                    "Введите %d троек (по тройке в строке (внимание, индексация столбцов и строк с 0!)): \n",
                    count);
             if (input_matrix_t(&matrix1, stdin, count))
             {
-                printf("Ошибка заполнения матрицы. Выход из программы.");
-                return INPUT_ERROR;
+                printf("Ошибка заполнения матрицы. Выход в меню.\n\n");
+                goto read_label;
             }
             convert_matrix(&matrix1, &matrix2);
             printf("Матрица заполнена!\n\n");
@@ -144,37 +144,37 @@ int main(void)
                    "(введите цифру от 1 до 3: 1 - 50х1, 2 - 400x1, 3 - 1000x1): ");
             if (scanf("%d", &answer) != READED || answer < 1 || answer > 3)
             {
-                printf("Ошибка! Введено неверное значение. Завершение программы.");
-                return INPUT_ERROR;
+                printf("Ошибка! Введено неверное значение. Выход в меню.\n\n");
+                goto read_label;
             }
             count = sizes[answer - 1];
             if (create_matrix_t(&factor1, sizes[answer - 1], 1) ||
                 create_matrix_std(&factor2, sizes[answer - 1], 1))
             {
-                printf("Проблемы с созданием вектора. Выход из программы.");
-                return INPUT_ERROR;
+                printf("Проблемы с созданием вектора. Выход в меню.\n\n");
+                goto read_label;
             }
 
             f = fopen(filenames[VECTOR_INDEXES + answer - 1], "r");
             if (!f)
             {
-                printf("Проблемы с открытием файла. Завершение программы.");
-                return INPUT_ERROR;
+                printf("Проблемы с открытием файла. Выход в меню.\n\n");
+                goto read_label;
             }
             printf("\nВведите процент заполненности (от 1 до 100): ");
             if (scanf("%d", &answer) != READED || answer < 1 || answer > 100)
             {
                 fclose(f);
-                printf("Ошибка! Введено неверное значение. Завершение программы.");
-                return INPUT_ERROR;
+                printf("Ошибка! Введено неверное значение. Выход в меню.\n\n");
+                goto read_label;
             }
 
             count = count * answer / 100;
             if (input_matrix_t(&factor1, f, count))
             {
                 fclose(f);
-                printf("Ошибка заполнения вектора. Выход из программы.");
-                return INPUT_ERROR;
+                printf("Ошибка заполнения вектора. Выход в меню.\n\n");
+                goto read_label;
             }
             fclose(f);
             convert_matrix(&factor1, &factor2);
@@ -184,36 +184,36 @@ int main(void)
         case 4:
             is_mult_res = 0;
             printf("Заполнение вектора вручную."
-                   "\nВведите размер вектора"
+                   "\nВведите размер вектора "
                    "(от 0 до 1000): ");
             if (scanf("%d", user_sizes) != READED || user_sizes[0] <= 0 ||
                 user_sizes[0] > MAX_SIZE_MATRIX)
             {
-                printf("Размер введен неверно, выход из программы.");
-                return INPUT_ERROR;
+                printf("Размер введен неверно, выход в меню.\n\n");
+                goto read_label;
             }
 
             count = user_sizes[0];
             if (create_matrix_t(&factor1, user_sizes[0], 1))
             {
-                printf("Проблемы с созданием вектора. Выход из программы.");
-                return INPUT_ERROR;
+                printf("Проблемы с созданием вектора. Выход в меню.\n\n");
+                goto read_label;
             }
 
             printf("\nВведите количество элементов вектора (от 1 до максимального кол-ва): ");
             if (scanf("%d", &count) != READED || count > user_sizes[0] ||
                 count <= 0)
             {
-                printf("Ошибка! Введено неверное количество. Завершение программы.");
-                return INPUT_ERROR;
+                printf("Ошибка! Введено неверное количество. Выход в меню.\n\n");
+                goto read_label;
             }
             printf("Ввод вектора выполняется тройками: \"ряд столбец значение\".\n"
                    "Введите %d троек (по тройке в строке (внимание, индексация столбцов и строк с 0!)): \n",
                    count);
             if (input_matrix_t(&factor1, stdin, count))
             {
-                printf("Ошибка заполнения вектора. Выход из программы.");
-                return INPUT_ERROR;
+                printf("Ошибка заполнения вектора. Выход в меню.\n\n");
+                goto read_label;
             }
             convert_matrix(&factor1, &factor2);
             printf("Вектор заполнен!\n\n");
@@ -221,7 +221,10 @@ int main(void)
             //=====================================================================================================================
         case 5:
             if (create_matrix_std(&res2, matrix2.rows, 1))
-                return MULT_ERROR;
+            {
+                printf("Ошибка создания матрицы-результата. Убедитесь, что вы правильно ввели матрицу и вектор.\n");
+                goto read_label;
+            }
             start = clock();
             if (multiply_std(&matrix2, &factor2, &res2) != OK)
             {
@@ -235,7 +238,10 @@ int main(void)
             //=====================================================================================================================
         case 6:
             if (create_matrix_t(&res1, matrix1.rows, 1))
-                return MULT_ERROR;
+            {
+                printf("Ошибка создания матрицы-результата. Убедитесь, что вы правильно ввели матрицу и вектор.\n");
+                goto read_label;
+            }
             start = clock();
             if (multiply_t(&matrix1, &factor1, &res1) != OK)
             {
@@ -257,10 +263,20 @@ int main(void)
                 convert_matrix(&matrix1, &matrix2);
                 convert_matrix(&factor1, &factor2);
                 convert_matrix(&res1, &res2);
-                print_elems(&matrix2, &factor2, &res2);
+                if (print_elems(&matrix2, &factor2, &res2))
+                {
+                    printf("Печать в координатном виде...\n\n");
+                    print_coords(&matrix2, &factor2, &res2);
+                }
             }
             else if (is_mult_res == 1)
-                print_elems(&matrix2, &factor2, &res2);
+            {
+                if (print_elems(&matrix2, &factor2, &res2))
+                {
+                    printf("Печать в координатном виде...\n\n");
+                    print_coords(&matrix2, &factor2, &res2);
+                }
+            }
             else
                 printf("Еще не было умножения.");
             break;
@@ -268,6 +284,7 @@ int main(void)
         default:
             printf("Введено некорректное значение, повторите.");
         }
+    read_label:
         print_menu(stdout);
         while (scanf("%d", &choice) != READED)
         {

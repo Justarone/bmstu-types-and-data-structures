@@ -13,18 +13,18 @@ int create_matrix_t(matrix_t *const matrix, const int rows, const int columns)
         return SIZE_ERROR;
     matrix->rows = rows;
     matrix->columns = columns;
-    for (int i = 0; i < rows; i++)
+    for (int i = 0; i < columns; i++)
     {
         matrix->pointer[i].next = &matrix->pointer[i + 1];
         matrix->pointer[i].index = 0;
     }
-    matrix->pointer[rows].next = NULL;
+    matrix->pointer[columns].next = NULL;
     return OK;
 }
 
 int create_matrix_std(matrix_std *const matrix, const int rows, const int columns)
 {
-    if (rows <= 0 || columns <= 0)
+    if (rows <= 0 || columns <= 0 || rows > MAX_SIZE_MATRIX || columns > MAX_SIZE_MATRIX)
         return SIZE_ERROR;
     matrix->rows = rows;
     matrix->columns = columns;
@@ -111,6 +111,7 @@ int input_matrix_t(matrix_t *const matrix, FILE *const stream, const int count)
         return COUNT_ERROR;
     for (int i = 0; i < count; i++)
     {
+        printf("%d %d \n", i, count);
         if (fscanf(stream, "%d%d%d", triple, triple + 1, triple + 2) != TRIPLE_READED ||
             triple[0] >= matrix->rows || triple[1] >= matrix->columns)
             return READ_ERROR;

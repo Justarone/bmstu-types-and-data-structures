@@ -5,8 +5,10 @@
 #include <time.h>
 
 void print_menu(FILE *const stream);
-void print_elems(const matrix_std *const matrix, const matrix_std *const factor,
-                 const matrix_std *const res);
+int print_elems(const matrix_std *const matrix, const matrix_std *const factor,
+                const matrix_std *const res);
+void print_coords(const matrix_std *const matrix, const matrix_std *const factor,
+                  const matrix_std *const res);
 void print_times(const clock_t *const times);
 
 #endif
