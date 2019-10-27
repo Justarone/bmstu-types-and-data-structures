@@ -36,8 +36,7 @@ int create_matrix_std(matrix_std *const matrix, const int rows, const int column
 
 int input_matrix_std(matrix_std *const matrix, FILE *const stream, const int count)
 {
-    // input of nonzero elements count
-    int triple[3]; // array for triples = { row, column, value }
+    int triple[3]; // массив троек = { ряд, столбец, значение }
     if (count <= 0 || count >= MAX_MATRIX_ELEMS)
         return COUNT_ERROR;
     for (int i = 0; i < count; i++)
@@ -111,7 +110,7 @@ int input_matrix_t(matrix_t *const matrix, FILE *const stream, const int count)
         return COUNT_ERROR;
     for (int i = 0; i < count; i++)
     {
-        printf("%d %d \n", i, count);
+        printf("прочитано %d из %d элементов \n", i, count);
         if (fscanf(stream, "%d%d%d", triple, triple + 1, triple + 2) != TRIPLE_READED ||
             triple[0] >= matrix->rows || triple[1] >= matrix->columns)
             return READ_ERROR;

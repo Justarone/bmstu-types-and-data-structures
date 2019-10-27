@@ -20,6 +20,8 @@ void print_menu(FILE *const stream)
     fprintf(stream, MENU_TEXT);
 }
 
+// функция печати элементов (печати в обычном виде, только если каждый размер <= 10)
+// печать происходит таким образом: ряд матрицы       элемент вектора-столбца        элемент вектора-результата (тоже столбца)
 int print_elems(const matrix_std *const matrix1, const matrix_std *const matrix2, const matrix_std *const res)
 {
     if (matrix1->columns > 10 || matrix1->rows > 10)
@@ -32,7 +34,10 @@ int print_elems(const matrix_std *const matrix1, const matrix_std *const matrix2
     {
         for (int j = 0; j < matrix1->columns; j++)
             printf("%3d ", matrix1->data[i][j]);
-        printf("   %3d    ", matrix2->data[i][0]);
+        if (matrix2->rows > i)
+            printf("   %3d    ", matrix2->data[i][0]);
+        else
+            printf("          ");
         printf("%3d\n", res->data[i][0]);
     }
     for (int i = matrix1->rows; i < matrix2->rows; i++)

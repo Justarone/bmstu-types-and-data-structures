@@ -81,6 +81,7 @@ int multiply_t(const matrix_t *const matrix, const matrix_t *const factor,
         cur_col++;
         pointer.index = pointer.next->index;
         pointer.next = pointer.next->next;
+        // pointer = *pointer.next
     }
     return OK;
 }
