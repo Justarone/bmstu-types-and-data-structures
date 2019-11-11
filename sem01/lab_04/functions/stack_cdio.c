@@ -3,9 +3,11 @@
 #include <stddef.h>
 
 #define NOT_IN -1
+#define READ_ERROR 15
 #define ALLOCATION_ERROR 17
 #define PUSH_ERROR 27
 #define OK 0
+#define TOO_BIG_N 10
 
 int freed_zone = 0;
 int new_zone = 0;
@@ -112,7 +114,22 @@ node_t *add_st_l(const node_t *const ps, const int n, array_d *const free_zones)
 }
 
 // pushes n elements in array-stack
-int add_st_a(const stack_a *const ps, const int n, array_d *const free_zones);
+int add_st_a(const stack_a *const ps, const int n, array_d *const free_zones,
+             const int mode)
+{
+    if (n > 10000)
+        return TOO_BIG_N;
+
+    void *value;
+    for (int i = 0; i < n; i++)
+    {
+        if (!(value = scan_value(mode)))
+            return READ_ERROR;
+        if (!push_st_a(ps, value, free_zones))
+            return PUSH_ERROR;
+    }
+    return OK;
+}
 
 // pop function for list-stack
 // the second argument is array with freed zones (to check fragmentation)
@@ -189,9 +206,19 @@ void *pop_a(stack_a *const array_stack, array_d *const free_zones)
 // cleans n elements of array-stack (if n is bigger than the number of elements
 // it cleans all stack)
 // returns number of cleaned elements
-int cleann_l(node_t *ps, const int n, array_d *const free_zones);
+int cleann_l(node_t *ps, const int n, array_d *const free_zones)
+{
+    for (int i = 0; i < n; i++)
+        if (!pop_l(ps, free_zones))
+            return i + 1;
+}
 
 // cleans n elements of list-stack (if n is bigger than the size of stack
 // it cleans all stack)
 // returns number of cleaned elements
-int cleann_a(stack_a *const array_stack, const int n, array_d *const free_zones);
+int cleann_a(stack_a *const array_stack, const int n, array_d *const free_zones)
+{
+    for (int i = 0; i < n; i++)
+        if (!pop_a(array_stack, free_zones))
+            return i + 1;
+}
