@@ -3,12 +3,15 @@
 #include "stack_cdio.h"
 #include "output_funcs.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 #define OK 0
 #define READED 1
 #define INIT_SIZE_FREE_ZONES 1000000
+#define MAX_AMOUNT 1000
 
 #define ALLOCATION_ERROR 17
+#define PUSH_ERROR 18
 
 int main(void)
 {
@@ -31,6 +34,7 @@ int main(void)
 
     int err_code = 0;
     int amount;
+    int mode;
 
     print_menu();
     while (scanf("%d", &choice) != READED)
@@ -49,42 +53,125 @@ int main(void)
             return OK;
 
         case 1:
-            printf("Введите количество элементов (от 1 до 10000): ");
+            printf("Введите количество элементов (от 1 до 1000): ");
             if (scanf("%d", &amount) != READED)
             {
                 puts("Не удалось считать количество элементов.\n");
                 break;
             }
-            if (amount <= 0 || amount > 10000)
+            if (amount <= 0 || amount > MAX_AMOUNT)
             {
                 puts("Неверное значение количества элементов.\n");
                 break;
             }
-            add_st_l(ps, amount, free_zones);
+            node_t *temp = add_st_l(&ps, &amount, free_zones);
+            if (!temp)
+            {
+                printf("Кажется, стек переполнился..."
+                       " (добавлено %d элементов)\n",
+                       amount);
+                break;
+            }
+            printf("Элементы добавлены.\n");
+            ps = temp;
             break;
 
         case 2:
+            printf("Введите количество элементов (от 1 до 1000): ");
+            if (scanf("%d", &amount) != READED)
+            {
+                puts("Не удалось считать количество элементов.\n");
+                break;
+            }
+            if (amount <= 0 || amount > MAX_AMOUNT)
+            {
+                puts("Неверное значение количества элементов.\n");
+                break;
+            }
+            printf("Введите режим:\n1. Случайное заполнение\n2."
+                   " Ручное заполнение.\nВвод: ");
+            if (scanf("%d", &mode) != READED)
+            {
+                puts("Не удалось считать режим.\n");
+                break;
+            }
+            if (mode != 1 && mode != 2)
+            {
+                puts("Неверное значение режима.\n");
+                break;
+            }
+            if (add_st_a(&as, &amount, free_zones, mode % 2))
+            {
+                printf("Кажется, стек переполнился..."
+                       " (добавлено %d элементов)\n",
+                       amount);
+                break;
+            }
+            printf("Элементы добавлены");
             break;
 
         case 3:
+            printf("Введите количество элементов, которое нужно удалить"
+                   "\n(от 1 до 1000; примечание: при вводе числа, большего количества элементов в стеке\n"
+                   "стек очистится полностью): ");
+            if (scanf("%d", &amount) != READED)
+            {
+                puts("Не удалось считать количество элементов.\n");
+                break;
+            }
+            if (amount <= 0 || amount > MAX_AMOUNT)
+            {
+                puts("Неверное значение количества элементов.\n");
+                break;
+            }
+            if ((err_code = cleann_l(&ps, amount, free_zones)) != amount)
+            {
+                printf("Кажется, стек закончился..."
+                       " (очищено %d элементов)\n",
+                       err_code);
+                break;
+            }
+            printf("Нужное количество элементов очищено!");
             break;
 
         case 4:
+            printf("Введите количество элементов, которое нужно удалить"
+                   "\n(от 1 до 1000; примечание: при вводе числа, большего количества элементов в стеке\n"
+                   "стек очистится полностью): ");
+            if (scanf("%d", &amount) != READED)
+            {
+                puts("Не удалось считать количество элементов.\n");
+                break;
+            }
+            if (amount <= 0 || amount > MAX_AMOUNT)
+            {
+                puts("Неверное значение количества элементов.\n");
+                break;
+            }
+            if ((err_code = cleann_a(&as, amount, free_zones)) != amount)
+            {
+                printf("Кажется, стек закончился..."
+                       " (очищено %d элементов)\n",
+                       err_code);
+                break;
+            }
+            printf("Нужное количество элементов очищено!");
             break;
 
         case 5:
+            print_stack_l(ps);
             break;
 
         case 6:
+            print_stack_a(&as);
             break;
 
         case 7:
+            print_free_zones(free_zones);
             break;
 
         case 8:
-            break;
-
-        case 9:
+            print_stat();
             break;
 
         default:
@@ -102,5 +189,15 @@ int main(void)
     }
     free(free_zones->data);
     free(free_zones);
+    while (ps)
+    {
+        node_t *temp = ps;
+        ps = ps->next;
+        free(temp);
+    }
+    if (as.data)
+    {
+        free(as.data);
+    }
     return OK;
 }

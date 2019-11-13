@@ -5,6 +5,7 @@
         "titleBar.activeForeground": "#FFFCFE"
     },
     "files.associations": {
-        "stack_cdio.h": "c"
+        "stack_cdio.h": "c",
+        "stack_utils.h": "c"
     }
 }

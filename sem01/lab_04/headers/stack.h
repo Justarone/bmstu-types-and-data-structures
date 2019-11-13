@@ -5,6 +5,7 @@ typedef struct node_t
 {
     void *value;         // value of the node data
     struct node_t *next; // pointer on the next node (NULL if the last node)
+    int number;          // this field is needed to check the number of elements in the stack
 } node_t;
 
 typedef struct

@@ -1,9 +1,10 @@
 #include "dynamic_array_utils.h"
-#include <stddef.h>
+#include <stdlib.h>
 
 #define OK 0
 #define ALLOCATION_ERROR 17
 #define ELEMENT_ERROR 18
+#define SIZE_ERROR 19
 #define NOT_IN -1
 
 int allocate_memory(array_d *const array)
@@ -24,10 +25,17 @@ int allocate_memory(array_d *const array)
     return OK;
 }
 
-// this function inserts free spaces in order (like iteration of insertion sort)
-int insert_element(array_d *const array, const void *const element)
+void swap_p(void **const p1, void **const p2)
 {
-    if (array->data_size <= array->mem_size)
+    void *temp = *p1;
+    *p1 = *p2;
+    *p2 = temp;
+}
+
+// this function inserts free spaces in order (like iteration of insertion sort)
+int insert_element(array_d *const array, void *const element)
+{
+    if (array->data_size == array->mem_size)
         if (allocate_memory(array))
             return ALLOCATION_ERROR;
 
@@ -41,9 +49,12 @@ int insert_element(array_d *const array, const void *const element)
 
 int delete_element(array_d *const array, const int pos)
 {
+    if (array->data_size <= 0)
+        return SIZE_ERROR;
     for (int i = pos; i < array->data_size - 1; i++)
         array->data[i] = array->data[i + 1];
     array->data_size--;
+    return OK;
 }
 
 int is_in(array_d *const array, const void *const elem)

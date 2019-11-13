@@ -1,13 +1,18 @@
 #include "stack_cdio.h"
 #include "dynamic_array_utils.h"
-#include <stddef.h>
+#include "stack_utils.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 #define NOT_IN -1
 #define READ_ERROR 15
 #define ALLOCATION_ERROR 17
 #define PUSH_ERROR 27
+#define SIZE_ERROR 37
 #define OK 0
 #define TOO_BIG_N 10
+#define STACK_SIZE 1000
+#define MAX_AMOUNT 1000
 
 int freed_zone = 0;
 int new_zone = 0;
@@ -19,44 +24,61 @@ static int flag_l = 1000000;
 // add to classic (list) stack: returns NULL if unseccessful
 // else address of new ps
 // note for myself: i only use adress of the new memory zone, so i don't need `**`
-node_t *push_st_l(const node_t *const ps, array_d *const free_zones)
+node_t *push_st_l(node_t *const ps, array_d *const free_zones)
 {
+    if (ps == NULL)
+    {
+        node_t *new_ps = (node_t *)malloc(sizeof(node_t));
+        new_ps->value = (void *)new_ps;
+        new_ps->number = 0;
+        new_ps->next = NULL;
+        return new_ps;
+    }
+    if (ps->number >= STACK_SIZE - 1)
+        return NULL;
     node_t *new_ps = (node_t *)malloc(sizeof(node_t));
     if (!new_ps)
-        return new_ps;
+        return NULL;
 
     if (flag_l)
     {
-        if (free_zones->data_size != 0)
+        int pos;
+        if ((pos = is_in(free_zones, new_ps)) != NOT_IN)
         {
-            int pos;
-            if ((pos = is_in(free_zones, new_ps)) != NOT_IN)
-            {
-                flag_l--;
-                freed_zone++;
-                delete_element(free_zones, pos);
-            }
-            else
-                new_zone++;
+            flag_l--;
+            freed_zone++;
+            delete_element(free_zones, pos);
         }
+        else
+            new_zone++;
     }
     new_ps->next = ps;
     new_ps->value = (void *)new_ps;
+    new_ps->number = ps->number + 1;
     return new_ps;
 }
 
 // add to array-stack: returns 0 if successful else - error code (it
 // updates stack in arguments)
-int push_st_a(stack_a *const ps, const void *const value,
+int push_st_a(stack_a *const ps, void *const value,
               array_d *const free_zones)
 {
     int len = 0;
     if (ps->data)
         len = ps->last - ps->data + 1;
-
+    if (len > STACK_SIZE)
+        return SIZE_ERROR;
     void **temp = (void **)realloc(ps->data, (++len) * sizeof(void *));
     if (!temp)
         return ALLOCATION_ERROR;
+    if (ps->data == NULL)
+    {
+        insert_element(free_zones, temp);
+        new_zone += 2;
+        ps->last = (ps->data = temp) + len - 1;
+        *(ps->data) = value;
+        return OK;
+    }
     ps->last = ps->data + len - 2;
     *(ps->data + len - 1) = value;
 
@@ -102,48 +124,76 @@ int push_st_a(stack_a *const ps, const void *const value,
 
 // pushes n elements list-stack
 // p.s.: only works with correct n (n > 0)
-node_t *add_st_l(const node_t *const ps, const int n, array_d *const free_zones)
+node_t *add_st_l(node_t **const ps, int *const n, array_d *const free_zones)
 {
     // error: too big n;
-    if (n > 10000)
+    if (*n > MAX_AMOUNT || *n <= 0)
         return NULL;
-    node_t *new_node = push_st_l(ps, free_zones);
-    for (int i = 0; i < n; i++)
-        new_node = push_st_l(new_node, free_zones);
+    node_t *new_node = push_st_l(*ps, free_zones);
+    if (!new_node)
+    {
+        *n = 0;
+        return NULL;
+    }
+    node_t *temp;
+    for (int i = 0; i < *n - 1; i++)
+    {
+        temp = push_st_l(new_node, free_zones);
+        if (!temp)
+        {
+            *n = i + 1;
+            *ps = new_node;
+            return NULL;
+        }
+        else
+            new_node = temp;
+    }
     return new_node;
 }
 
 // pushes n elements in array-stack
-int add_st_a(const stack_a *const ps, const int n, array_d *const free_zones,
+int add_st_a(stack_a *const ps, int *const n, array_d *const free_zones,
              const int mode)
 {
-    if (n > 10000)
+    long long int buf;
+    if (*n > MAX_AMOUNT || *n < 0)
         return TOO_BIG_N;
 
     void *value;
-    for (int i = 0; i < n; i++)
+
+    for (int i = 0; i < *n; i++)
     {
-        if (!(value = scan_value(mode)))
+        if ((buf = scan_value(mode)) < 0)
+        {
+            *n = i;
             return READ_ERROR;
-        if (!push_st_a(ps, value, free_zones))
+        }
+        value = (void *)buf;
+        if (push_st_a(ps, value, free_zones))
+        {
+            *n = i;
             return PUSH_ERROR;
+        }
     }
     return OK;
 }
 
 // pop function for list-stack
 // the second argument is array with freed zones (to check fragmentation)
-void *pop_l(node_t *ps, array_d *const free_zones)
+void *pop_l(node_t **ps, array_d *const free_zones)
 {
-    if (!ps)
+    if (!(*ps))
+    {
+        puts("oh, here is null");
         return NULL;
-
+    }
     flag_l++;
-    node_t *temp = ps;
-    ps = ps->next;
+    node_t *temp = *ps;
+    *ps = (*ps)->next;
     void *value = temp->value;
 
     insert_element(free_zones, temp);
+    printf("here");
     free(temp);
     return value;
 }
@@ -206,11 +256,12 @@ void *pop_a(stack_a *const array_stack, array_d *const free_zones)
 // cleans n elements of array-stack (if n is bigger than the number of elements
 // it cleans all stack)
 // returns number of cleaned elements
-int cleann_l(node_t *ps, const int n, array_d *const free_zones)
+int cleann_l(node_t **ps, const int n, array_d *const free_zones)
 {
     for (int i = 0; i < n; i++)
         if (!pop_l(ps, free_zones))
-            return i + 1;
+            return i;
+    return n;
 }
 
 // cleans n elements of list-stack (if n is bigger than the size of stack
@@ -220,5 +271,6 @@ int cleann_a(stack_a *const array_stack, const int n, array_d *const free_zones)
 {
     for (int i = 0; i < n; i++)
         if (!pop_a(array_stack, free_zones))
-            return i + 1;
+            return i;
+    return n;
 }
