@@ -19,8 +19,6 @@ long long int scan_value(const int mode)
         return rand() % INT_MAX;
 
     long long int answer;
-    printf("Введите адрес в виде десятичного или шестнадцатиричного числа"
-           "\n(помните, что адрес должен быть в пределах от 0 до 0xFFFFFFFF");
 
     if (scanf("%lli", &answer) != READED)
         return READ_ERROR;

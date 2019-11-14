@@ -7,6 +7,8 @@
 
 #define OK 0
 #define READED 1
+#define READ_ERROR 15
+
 #define INIT_SIZE_FREE_ZONES 1000000
 #define MAX_AMOUNT 1000
 
@@ -27,6 +29,7 @@ int main(void)
         return ALLOCATION_ERROR;
     }
     free_zones->mem_size = INIT_SIZE_FREE_ZONES;
+    free_zones->data_size = 0;
 
     // init stacks:
     node_t *ps = NULL;
@@ -50,7 +53,7 @@ int main(void)
         {
         case 0:
             puts("Выход...");
-            return OK;
+            goto free_label;
 
         case 1:
             printf("Введите количество элементов (от 1 до 1000): ");
@@ -68,7 +71,7 @@ int main(void)
             if (!temp)
             {
                 printf("Кажется, стек переполнился..."
-                       " (добавлено %d элементов)\n",
+                       " (Количество добавленных элементов: %d)\n",
                        amount);
                 break;
             }
@@ -88,7 +91,7 @@ int main(void)
                 puts("Неверное значение количества элементов.\n");
                 break;
             }
-            printf("Введите режим:\n1. Случайное заполнение\n2."
+            printf("Введите режим:\n1. Случайное заполнение.\n2."
                    " Ручное заполнение.\nВвод: ");
             if (scanf("%d", &mode) != READED)
             {
@@ -100,10 +103,13 @@ int main(void)
                 puts("Неверное значение режима.\n");
                 break;
             }
-            if (add_st_a(&as, &amount, free_zones, mode % 2))
+            if ((err_code = add_st_a(&as, &amount, free_zones, mode % 2)))
             {
-                printf("Кажется, стек переполнился..."
-                       " (добавлено %d элементов)\n",
+                if (err_code == READ_ERROR)
+                    printf("Возникла ошибка при вводе адреса...");
+                else
+                    printf("Кажется, стек переполнился...");
+                printf(" (Количество добавленных элементов: %d)\n",
                        amount);
                 break;
             }
@@ -127,7 +133,7 @@ int main(void)
             if ((err_code = cleann_l(&ps, amount, free_zones)) != amount)
             {
                 printf("Кажется, стек закончился..."
-                       " (очищено %d элементов)\n",
+                       " (Количество очищенных элементов: %d)\n",
                        err_code);
                 break;
             }
@@ -151,7 +157,7 @@ int main(void)
             if ((err_code = cleann_a(&as, amount, free_zones)) != amount)
             {
                 printf("Кажется, стек закончился..."
-                       " (очищено %d элементов)\n",
+                       " (Количество очищенных элементов: %d)\n",
                        err_code);
                 break;
             }
@@ -181,12 +187,13 @@ int main(void)
         print_menu();
         while (scanf("%d", &choice) != READED)
         {
-            puts("Введено не число, попробуйте снова:");
+            puts("\n\nВведено не число, попробуйте снова:");
             char c;
             while (scanf("%c", &c) == READED && c != '\n')
                 ;
         }
     }
+free_label:
     free(free_zones->data);
     free(free_zones);
     while (ps)

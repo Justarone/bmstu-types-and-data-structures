@@ -17,6 +17,6 @@ functions/%.o: functions/%.c
 	$(CC) -c -o $@ -I $(HDRS_DIR) $(CFLAGS) $< -MD
 
 clean:
-	rm -f functions/*.o *.o functions/*.d *.d
+	rm -f *.exe functions/*.o *.o functions/*.d *.d
 
 include $(wildcard functions/*.d *.d)

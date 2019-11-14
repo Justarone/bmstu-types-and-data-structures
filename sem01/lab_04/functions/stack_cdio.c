@@ -13,6 +13,7 @@
 #define TOO_BIG_N 10
 #define STACK_SIZE 1000
 #define MAX_AMOUNT 1000
+#define MANUAL_MODE 0
 
 int freed_zone = 0;
 int new_zone = 0;
@@ -66,15 +67,22 @@ int push_st_a(stack_a *const ps, void *const value,
     int len = 0;
     if (ps->data)
         len = ps->last - ps->data + 1;
-    if (len > STACK_SIZE)
+    if (len >= STACK_SIZE)
         return SIZE_ERROR;
     void **temp = (void **)realloc(ps->data, (++len) * sizeof(void *));
     if (!temp)
         return ALLOCATION_ERROR;
     if (ps->data == NULL)
     {
-        insert_element(free_zones, temp);
-        new_zone += 2;
+        int pos;
+        if ((pos = is_in(free_zones, temp)) != NOT_IN)
+        {
+            flag_l--;
+            freed_zone++;
+            delete_element(free_zones, pos);
+        }
+        else
+            new_zone++;
         ps->last = (ps->data = temp) + len - 1;
         *(ps->data) = value;
         return OK;
@@ -135,6 +143,19 @@ node_t *add_st_l(node_t **const ps, int *const n, array_d *const free_zones)
         *n = 0;
         return NULL;
     }
+    else
+    {
+        int pos;
+        if ((pos = is_in(free_zones, new_node)) != NOT_IN)
+        {
+            flag_a--;
+            freed_zone++;
+            delete_element(free_zones, pos);
+        }
+        else
+            new_zone++;
+    }
+
     node_t *temp;
     for (int i = 0; i < *n - 1; i++)
     {
@@ -161,8 +182,13 @@ int add_st_a(stack_a *const ps, int *const n, array_d *const free_zones,
 
     void *value;
 
+    if (mode == MANUAL_MODE)
+        printf("Введите адрес в виде десятичного или шестнадцатиричного числа"
+               "\n(помните, что адрес должен быть в пределах от 0 до 0xFFFFFFFF):\n");
     for (int i = 0; i < *n; i++)
     {
+        if (mode == MANUAL_MODE)
+            printf("Число №%d: ", i + 1);
         if ((buf = scan_value(mode)) < 0)
         {
             *n = i;
@@ -184,7 +210,6 @@ void *pop_l(node_t **ps, array_d *const free_zones)
 {
     if (!(*ps))
     {
-        puts("oh, here is null");
         return NULL;
     }
     flag_l++;
@@ -193,7 +218,6 @@ void *pop_l(node_t **ps, array_d *const free_zones)
     void *value = temp->value;
 
     insert_element(free_zones, temp);
-    printf("here");
     free(temp);
     return value;
 }
