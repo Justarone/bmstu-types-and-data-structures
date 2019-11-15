@@ -49,13 +49,10 @@ void print_stack_a(stack_a *ps)
         printf("Стек пуст.\n");
         return;
     }
-    int i = 1;
+    int len = ps->last - ps->data + 1;
     printf("Стек, хранящийся в виде массива:\n");
-    while (ps->last >= ps->data)
-    {
-        printf("%d. %p\n", i++, *ps->last);
-        ps->last--;
-    }
+    for (int i = 0; i < len; i++)
+        printf("%d. %p\n", i + 1, *(ps->data + i));
 }
 
 void print_stat()

@@ -87,7 +87,7 @@ int push_st_a(stack_a *const ps, void *const value,
         *(ps->data) = value;
         return OK;
     }
-    ps->last = ps->data + len - 2;
+    ps->last = ps->data + len - 1;
     *(ps->data + len - 1) = value;
 
     int pos;
