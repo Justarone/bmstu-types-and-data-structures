@@ -22,6 +22,10 @@ int new_zone = 0;
 static int flag_a = 1000000;
 static int flag_l = 1000000;
 
+// the iteration variable is used for me to check on what size of stack-array
+// the realloc (like real realloc, when the begin of array changes its place)
+// works
+// int iteration = 0;
 // add to classic (list) stack: returns NULL if unseccessful
 // else address of new ps
 // note for myself: i only use adress of the new memory zone, so i don't need `**`
@@ -108,6 +112,10 @@ int push_st_a(stack_a *const ps, void *const value,
 
     else
     {
+        // printf("(Память под весь массив теперь выделена в другом сегменте\n"
+        //        "Было:  %p\n Стало: %p)\n",
+        //        (void *)ps->data, (void *)temp);
+        // printf("Итерация номер %d\n", iteration);
         for (int i = 0; i < len; i++)
         {
             flag_a++;
@@ -195,6 +203,10 @@ int add_st_a(stack_a *const ps, int *const n, array_d *const free_zones,
             return READ_ERROR;
         }
         value = (void *)buf;
+        // the iteration variable shows on which size we are at the moment
+        // iteration = ps->last - ps->data + 1;
+        // alternative variant is to set iteration variable as the number of
+        // iteration of cycle in add_st_a (like `i`)
         if (push_st_a(ps, value, free_zones))
         {
             *n = i;
