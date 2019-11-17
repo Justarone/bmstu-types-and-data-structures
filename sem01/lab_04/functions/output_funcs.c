@@ -1,6 +1,11 @@
 #include "output_funcs.h"
 #include <stdio.h>
 
+#define LIST_STACK_PUSH 0
+#define LIST_STACK_POP 1
+#define ARRAY_STACK_PUSH 2
+#define ARRAY_STACK_POP 3
+
 extern int freed_zone;
 extern int new_zone;
 
@@ -15,7 +20,8 @@ void print_menu()
            "5. Вывести стек-список;\n"
            "6. Вывести стек-массив;\n"
            "7. Вывести массив свободных областей;\n"
-           "8. Вывод общей статистики.\n"
+           "8. Вывод общей статистики;\n"
+           "9. Вывод времени вставки и удаления элементов.\n"
            "\nВвод: ");
 }
 
@@ -60,4 +66,39 @@ void print_stat()
     printf("Количество памяти, взятой по-новой: %d\n"
            "Количество памяти, взятой из уже использованной: %d",
            new_zone, freed_zone);
+}
+
+void print_times(const times_t *const array)
+{
+    int flag = 1;
+    if (array[LIST_STACK_PUSH].time != 0)
+    {
+        flag = 0;
+        printf("Время добавления в стек-список %d элементов: %ld\n\n",
+               array[LIST_STACK_PUSH].amount, array[LIST_STACK_PUSH].time);
+    }
+
+    if (array[LIST_STACK_POP].time != 0)
+    {
+        flag = 0;
+        printf("Время удаления из стека-списка %d элементов: %ld\n\n",
+               array[LIST_STACK_POP].amount, array[LIST_STACK_POP].time);
+    }
+
+    if (array[ARRAY_STACK_PUSH].time != 0)
+    {
+        flag = 0;
+        printf("Время добавления в стек-массив %d элементов: %ld\n\n",
+               array[ARRAY_STACK_PUSH].amount, array[ARRAY_STACK_PUSH].time);
+    }
+
+    if (array[ARRAY_STACK_POP].time != 0)
+    {
+        flag = 0;
+        printf("Время удаления из стека-массива %d элементов: %ld\n\n",
+               array[ARRAY_STACK_POP].amount, array[ARRAY_STACK_POP].time);
+    }
+
+    if (flag)
+        printf("Время еще не замерялось...\n");
 }
