@@ -83,9 +83,7 @@ int main(void)
                 puts("Неверное значение количества элементов.\n");
                 break;
             }
-            times_array[LIST_STACK_PUSH].time = (long long)clock();
-            node_t *temp = add_st_l(&ps, &amount);
-            times_array[LIST_STACK_PUSH].time = clock() - times_array[LIST_STACK_PUSH].time;
+            node_t *temp = add_st_l(&ps, &amount, &times_array[LIST_STACK_PUSH].time);
             if (!temp)
             {
                 times_array[LIST_STACK_PUSH].amount = amount;
@@ -210,10 +208,8 @@ int main(void)
                 break;
             }
 
-            times_array[ARRAY_STACK_POP].time = clock();
-            if ((err_code = cleann_a(&as, amount)) != amount)
+            if ((err_code = cleann_a(&as, amount, &times_array[ARRAY_STACK_POP].time)) != amount)
             {
-                times_array[ARRAY_STACK_POP].time = clock() - times_array[ARRAY_STACK_POP].time;
                 times_array[ARRAY_STACK_POP].amount = err_code;
                 if (err_code == 0)
                     times_array[ARRAY_STACK_POP].time = 0;
@@ -222,7 +218,6 @@ int main(void)
                        err_code);
                 break;
             }
-            times_array[ARRAY_STACK_POP].time = clock() - times_array[ARRAY_STACK_POP].time;
             times_array[ARRAY_STACK_POP].amount = amount;
             printf("Нужное количество элементов очищено!");
             break;

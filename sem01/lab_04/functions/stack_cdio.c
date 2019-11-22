@@ -61,29 +61,37 @@ int push_st_a(stack_a *const ps, void *const value)
 
 // pushes n elements list-stack
 // p.s.: only works with correct n (n > 0)
-node_t *add_st_l(node_t **const ps, int *const n)
+node_t *add_st_l(node_t **const ps, int *const n, long int *const add_time)
 {
     // error: too big n;
     if (*n > MAX_AMOUNT || *n <= 0)
         return NULL;
+
+    *add_time = 0;
+    long int start = clock();
     node_t *new_node = push_st_l(*ps);
     if (!new_node)
     {
+        *add_time = clock() - start;
         *n = 0;
         return NULL;
     }
+    *add_time += clock() - start;
 
     node_t *temp;
     for (int i = 0; i < *n - 1; i++)
     {
+        start = clock();
         temp = push_st_l(new_node);
         if (!temp)
         {
             *n = i + 1;
             *ps = new_node;
+            *add_time += clock() - start;
             return NULL;
         }
         new_node = temp;
+        *add_time += clock() - start;
     }
     return new_node;
 }
@@ -178,10 +186,19 @@ int cleann_l(node_t **ps, const int n, long int *const clean_time, array_d *cons
 // cleans n elements of list-stack (if n is bigger than the size of stack
 // it cleans all stack)
 // returns number of cleaned elements
-int cleann_a(stack_a *const array_stack, const int n)
+int cleann_a(stack_a *const array_stack, const int n, long int *const clean_time)
 {
+    long int start;
+    *clean_time = 0;
     for (int i = 0; i < n; i++)
+    {
+        start = clock();
         if (!pop_a(array_stack))
+        {
+            *clean_time += clock() - start;
             return i;
+        }
+        *clean_time += clock() - start;
+    }
     return n;
 }

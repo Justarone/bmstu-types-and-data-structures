@@ -88,7 +88,7 @@ void print_times(const times_t *const array)
     {
         flag = 0;
         printf("Время добавления в стек-массив %d элементов: %ld\n\n",
-               array[ARRAY_STACK_PUSH].amount, array[ARRAY_STACK_PUSH].time / 100);
+               array[ARRAY_STACK_PUSH].amount, array[ARRAY_STACK_PUSH].time);
     }
 
     if (array[ARRAY_STACK_POP].time != 0)
