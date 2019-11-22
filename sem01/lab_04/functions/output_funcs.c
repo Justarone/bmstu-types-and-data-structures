@@ -50,14 +50,13 @@ void print_stack_l(const node_t *ps)
 
 void print_stack_a(stack_a *ps)
 {
-    if (ps->data == NULL)
+    if (ps->cur_index == 0)
     {
         printf("Стек пуст.\n");
         return;
     }
-    int len = ps->last - ps->data + 1;
     printf("Стек, хранящийся в виде массива:\n");
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < ps->cur_index; i++)
         printf("%d. %p\n", i + 1, *(ps->data + i));
 }
 
@@ -89,7 +88,7 @@ void print_times(const times_t *const array)
     {
         flag = 0;
         printf("Время добавления в стек-массив %d элементов: %ld\n\n",
-               array[ARRAY_STACK_PUSH].amount, array[ARRAY_STACK_PUSH].time);
+               array[ARRAY_STACK_PUSH].amount, array[ARRAY_STACK_PUSH].time / 100);
     }
 
     if (array[ARRAY_STACK_POP].time != 0)

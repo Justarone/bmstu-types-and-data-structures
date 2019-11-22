@@ -4,9 +4,10 @@
 #include "output_funcs.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "dynamic_array_utils.h"
 
-#define OK 0
 #define READED 1
+#define NOT_IN -1
 
 #define INIT_SIZE_FREE_ZONES 1000000
 #define MAX_AMOUNT 1000
@@ -16,9 +17,13 @@
 #define ARRAY_STACK_PUSH 2
 #define ARRAY_STACK_POP 3
 
+#define OK 0
 #define READ_ERROR 15
 #define ALLOCATION_ERROR 17
 #define PUSH_ERROR 18
+
+extern int freed_zone;
+extern int new_zone;
 
 int main(void)
 {
@@ -37,7 +42,8 @@ int main(void)
 
     // init stacks:
     node_t *ps = NULL;
-    stack_a as = {NULL, NULL}; // array stack**
+    stack_a as; // array stack**
+    as.cur_index = 0;
 
     // init times array:
     times_t times_array[4] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
@@ -78,11 +84,25 @@ int main(void)
                 break;
             }
             times_array[LIST_STACK_PUSH].time = (long long)clock();
-            node_t *temp = add_st_l(&ps, &amount, free_zones);
+            node_t *temp = add_st_l(&ps, &amount);
             times_array[LIST_STACK_PUSH].time = clock() - times_array[LIST_STACK_PUSH].time;
             if (!temp)
             {
                 times_array[LIST_STACK_PUSH].amount = amount;
+                // данный участок кода проверяет добавленные элементы
+                node_t *tmp = ps;
+                int pos;
+                for (int i = 0; i < amount; i++)
+                {
+                    if ((pos = is_in(free_zones, tmp)) != NOT_IN)
+                    {
+                        freed_zone++;
+                        delete_element(free_zones, pos);
+                    }
+                    else
+                        new_zone++;
+                    tmp = tmp->next;
+                }
                 if (amount == 0)
                     times_array[LIST_STACK_PUSH].time = 0;
                 printf("Кажется, стек переполнился..."
@@ -91,6 +111,19 @@ int main(void)
                 break;
             }
             times_array[LIST_STACK_PUSH].amount = amount;
+            node_t *tmp = temp;
+            int pos;
+            for (int i = 0; i < amount; i++)
+            {
+                if ((pos = is_in(free_zones, tmp)) != NOT_IN)
+                {
+                    freed_zone++;
+                    delete_element(free_zones, pos);
+                }
+                else
+                    new_zone++;
+                tmp = tmp->next;
+            }
             printf("Элементы добавлены.\n");
             ps = temp;
             break;
@@ -120,32 +153,18 @@ int main(void)
                 break;
             }
 
-            if (mode == 1)
-                times_array[ARRAY_STACK_PUSH].time = clock();
-            if ((err_code = add_st_a(&as, &amount, free_zones, mode % 2)))
+            if ((err_code = add_st_a(&as, &amount, mode % 2, &times_array[ARRAY_STACK_PUSH].time)))
             {
-                if (mode == 1)
-                {
-                    times_array[ARRAY_STACK_PUSH].time = clock() - times_array[ARRAY_STACK_PUSH].time;
-                    times_array[ARRAY_STACK_PUSH].amount = amount;
-                    if (amount == 0)
-                        times_array[ARRAY_STACK_PUSH].time = 0;
-                }
-
                 if (err_code == READ_ERROR)
                     printf("Возникла ошибка при вводе адреса...");
                 else
                     printf("Кажется, стек переполнился...");
                 printf(" (Количество добавленных элементов: %d)\n",
                        amount);
+                times_array[ARRAY_STACK_PUSH].amount = amount;
                 break;
             }
-
-            if (mode == 1)
-            {
-                times_array[ARRAY_STACK_PUSH].time = clock() - times_array[ARRAY_STACK_PUSH].time;
-                times_array[ARRAY_STACK_PUSH].amount = amount;
-            }
+            times_array[ARRAY_STACK_PUSH].amount = amount;
             printf("Элементы добавлены");
             break;
 
@@ -163,19 +182,15 @@ int main(void)
                 puts("Неверное значение количества элементов.\n");
                 break;
             }
-            times_array[LIST_STACK_POP].time = clock();
-            if ((err_code = cleann_l(&ps, amount, free_zones)) != amount)
+            if ((err_code = cleann_l(&ps, amount, &times_array[LIST_STACK_POP].time,
+                                     free_zones)) != amount)
             {
-                times_array[LIST_STACK_POP].time = clock() - times_array[LIST_STACK_POP].time;
                 times_array[LIST_STACK_POP].amount = err_code;
-                if (err_code == 0)
-                    times_array[LIST_STACK_POP].time = 0;
                 printf("Кажется, стек закончился..."
                        " (Количество очищенных элементов: %d)\n",
                        err_code);
                 break;
             }
-            times_array[LIST_STACK_POP].time = clock() - times_array[LIST_STACK_POP].time;
             times_array[LIST_STACK_POP].amount = amount;
             printf("Нужное количество элементов очищено!");
             break;
@@ -196,7 +211,7 @@ int main(void)
             }
 
             times_array[ARRAY_STACK_POP].time = clock();
-            if ((err_code = cleann_a(&as, amount, free_zones)) != amount)
+            if ((err_code = cleann_a(&as, amount)) != amount)
             {
                 times_array[ARRAY_STACK_POP].time = clock() - times_array[ARRAY_STACK_POP].time;
                 times_array[ARRAY_STACK_POP].amount = err_code;
@@ -253,10 +268,6 @@ free_label:
         node_t *temp = ps;
         ps = ps->next;
         free(temp);
-    }
-    if (as.data)
-    {
-        free(as.data);
     }
     return OK;
 }

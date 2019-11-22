@@ -1,6 +1,8 @@
 #ifndef _STACK_H_
 #define _STACK_H_
 
+#define ARRAY_SIZE 1000
+
 typedef struct node_t
 {
     void *value;         // value of the node data
@@ -10,8 +12,8 @@ typedef struct node_t
 
 typedef struct
 {
-    void **data; // the beginning of stack (like the bottom)
-    void **last; // the last element, which was added
+    void *data[ARRAY_SIZE];
+    int cur_index;
 } stack_a;
 
 #endif
