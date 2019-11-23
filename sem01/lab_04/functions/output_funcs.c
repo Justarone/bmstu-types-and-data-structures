@@ -70,28 +70,28 @@ void print_stat()
 void print_times(const times_t *const array)
 {
     int flag = 1;
-    if (array[LIST_STACK_PUSH].time != 0)
+    if (array[LIST_STACK_PUSH].time != 0 && array[LIST_STACK_PUSH].amount != 0)
     {
         flag = 0;
         printf("Время добавления в стек-список %d элементов: %ld\n\n",
                array[LIST_STACK_PUSH].amount, array[LIST_STACK_PUSH].time);
     }
 
-    if (array[LIST_STACK_POP].time != 0)
+    if (array[LIST_STACK_POP].time != 0 && array[LIST_STACK_POP].amount != 0)
     {
         flag = 0;
         printf("Время удаления из стека-списка %d элементов: %ld\n\n",
                array[LIST_STACK_POP].amount, array[LIST_STACK_POP].time);
     }
 
-    if (array[ARRAY_STACK_PUSH].time != 0)
+    if (array[ARRAY_STACK_PUSH].time != 0 && array[ARRAY_STACK_PUSH].amount != 0)
     {
         flag = 0;
         printf("Время добавления в стек-массив %d элементов: %ld\n\n",
                array[ARRAY_STACK_PUSH].amount, array[ARRAY_STACK_PUSH].time);
     }
 
-    if (array[ARRAY_STACK_POP].time != 0)
+    if (array[ARRAY_STACK_POP].time != 0 && array[ARRAY_STACK_POP].amount != 0)
     {
         flag = 0;
         printf("Время удаления из стека-массива %d элементов: %ld\n\n",
