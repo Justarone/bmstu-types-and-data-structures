@@ -3,7 +3,7 @@
 #include "dynamic_array_utils.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
+#include "timer.h"
 
 #define NOT_IN -1
 #define READ_ERROR 15
@@ -68,30 +68,30 @@ node_t *add_st_l(node_t **const ps, int *const n, long int *const add_time)
         return NULL;
 
     *add_time = 0;
-    long int start = clock();
+    long int start = tick();
     node_t *new_node = push_st_l(*ps);
     if (!new_node)
     {
-        *add_time = clock() - start;
+        *add_time = tick() - start;
         *n = 0;
         return NULL;
     }
-    *add_time += clock() - start;
+    *add_time += tick() - start;
 
     node_t *temp;
     for (int i = 0; i < *n - 1; i++)
     {
-        start = clock();
+        start = tick();
         temp = push_st_l(new_node);
         if (!temp)
         {
             *n = i + 1;
             *ps = new_node;
-            *add_time += clock() - start;
+            *add_time += tick() - start;
             return NULL;
         }
         new_node = temp;
-        *add_time += clock() - start;
+        *add_time += tick() - start;
     }
     return new_node;
 }
@@ -124,14 +124,14 @@ int add_st_a(stack_a *const ps, int *const n, const int mode, long int *const ad
         // iteration = ps->last - ps->data + 1;
         // alternative variant is to set iteration variable as the number of
         // iteration of cycle in add_st_a (like `i`)
-        start = clock();
+        start = tick();
         if (push_st_a(ps, value))
         {
-            *add_time += clock() - start;
+            *add_time += tick() - start;
             *n = i;
             return PUSH_ERROR;
         }
-        *add_time += clock() - start;
+        *add_time += tick() - start;
     }
     return OK;
 }
@@ -171,13 +171,13 @@ int cleann_l(node_t **ps, const int n, long int *const clean_time, array_d *cons
     long int start;
     for (int i = 0; i < n; i++)
     {
-        start = clock();
+        start = tick();
         if (!(temp = pop_l(ps)))
         {
-            *clean_time += clock() - start;
+            *clean_time += tick() - start;
             return i;
         }
-        *clean_time += clock() - start;
+        *clean_time += tick() - start;
         insert_element(free_zones, temp);
     }
     return n;
@@ -192,13 +192,13 @@ int cleann_a(stack_a *const array_stack, const int n, long int *const clean_time
     *clean_time = 0;
     for (int i = 0; i < n; i++)
     {
-        start = clock();
+        start = tick();
         if (!pop_a(array_stack))
         {
-            *clean_time += clock() - start;
+            *clean_time += tick() - start;
             return i;
         }
-        *clean_time += clock() - start;
+        *clean_time += tick() - start;
     }
     return n;
 }
