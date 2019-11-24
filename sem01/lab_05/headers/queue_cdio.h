@@ -5,8 +5,8 @@
 #include "array.h"
 
 queue_l *push_l(queue_l *const qh, const double value);
-int push_a(queue_a *const ps, const double value,
-           array_d *const free_zones);
-void *pop_l(queue_l **ps, array_d *const free_zones);
-void *pop_a(queue_a *const array_stack, array_d *const free_zones);
+int push_a(queue_a *const ps, const double value);
+int pop_l(queue_l *const queue, double *const value);
+int pop_a(queue_a *const queue, double *const value);
+
 #endif
