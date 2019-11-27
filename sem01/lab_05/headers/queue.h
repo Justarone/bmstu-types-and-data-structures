@@ -5,7 +5,7 @@
 
 typedef struct node_t
 {
-    double data;
+    int data;
     struct node_t *next;
 } node_t;
 

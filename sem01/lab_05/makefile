@@ -1,4 +1,4 @@
-CFLAGS = -Wall -Werror -std=c99 -pedantic -g
+CFLAGS = -Wall -Werror -std=c99 -g
 HDRS_DIR = headers/
 OBJ = $(patsubst %.c, %.o, $(wildcard functions/*.c *.c))
 CC = gcc

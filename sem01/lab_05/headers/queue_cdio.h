@@ -4,9 +4,11 @@
 #include "queue.h"
 #include "array.h"
 
-queue_l *push_l(queue_l *const qh, const double value);
-int push_a(queue_a *const ps, const double value);
-int pop_l(queue_l *const queue, double *const value);
-int pop_a(queue_a *const queue, double *const value);
+node_t *push_l(queue_l *const qh, const int value);
+int push_a(queue_a *const ps, const int value);
+int ins_l(queue_l *const queue, const double value, const int pos);
+int ins_a(queue_a *const queue, const int value, const int pos);
+int pop_l(queue_l *const queue, int *const value);
+int pop_a(queue_a *const queue, int *const value);
 
 #endif
