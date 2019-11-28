@@ -10,5 +10,6 @@ int ins_l(queue_l *const queue, const double value, const int pos);
 int ins_a(queue_a *const queue, const int value, const int pos);
 int pop_l(queue_l *const queue, int *const value);
 int pop_a(queue_a *const queue, int *const value);
+void print_queue(queue_l *const queue);
 
 #endif

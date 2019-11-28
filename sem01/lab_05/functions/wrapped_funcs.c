@@ -44,7 +44,7 @@ void wrapped_ins_l(queue_l *const queue, stat_t *const statistic,
                    const int pos, const int value)
 {
     int err_code = ins_l(queue, value, pos);
-    if (err_code != OK)
+    if (err_code == OK)
     {
         // updating info for average queue length
         statistic->len_sum += queue->size;

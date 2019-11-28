@@ -11,7 +11,7 @@ void print_stat(const stat_t *const statistic)
     printf("Количество вышедших заявок: %d 1 типа и %d 2 типа\n", statistic->out_amount[TYPE_1],
            statistic->out_amount[TYPE_2]);
     printf("За это время машина: работала %lf секунд c 1 типом заявок, %lf секунд"
-           " c 2 типом заявок и стояла %lf секунд",
+           " c 2 типом заявок и стояла %lf секунд\n",
            statistic->work_time[TYPE_1],
            statistic->work_time[TYPE_2],
            statistic->waiting_time);

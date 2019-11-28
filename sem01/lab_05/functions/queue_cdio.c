@@ -1,5 +1,6 @@
 #include "queue_cdio.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 #define OK 0
 #define OVERFLOW_ERROR 1
@@ -41,7 +42,7 @@ int ins_l(queue_l *const queue, const double value, const int pos)
         pop_l(queue, &val);
     }
 
-    if (queue->size == 0)
+    if (queue->size <= pos)
     {
         node_t *res = push_l(queue, value);
         if (!res)
@@ -63,11 +64,14 @@ int ins_l(queue_l *const queue, const double value, const int pos)
         queue->pout = node;
         return OK;
     }
-    //
+
     node_t *tmp;
     for (i = 0, tmp = queue->pout; i < pos - 1 && tmp->next; i++, tmp = tmp->next)
         ;
-    node->next = tmp->next->next;
+    if (tmp->next)
+        node->next = tmp->next->next;
+    else
+        node->next = NULL;
     tmp->next = node;
     node->data = value;
     return OK;
@@ -78,7 +82,7 @@ static void ring_array_insert(queue_a *const queue, const int value, const int p
     int i = (queue->pin > pos) ? queue->pin : queue->pin + QUEUE_SIZE;
     while (i > pos)
     {
-        queue->data[i - 1] = queue->data[i];
+        queue->data[(i - 1) % QUEUE_SIZE] = queue->data[i % QUEUE_SIZE];
         i--;
     }
     queue->pin++;
@@ -131,6 +135,8 @@ int pop_l(queue_l *const queue, int *const value)
     queue->pout = queue->pout->next;
     free(tmp);
     queue->size--;
+    if (queue->size == 0)
+        queue->pin = NULL;
     return OK;
 }
 
@@ -147,4 +153,16 @@ int pop_a(queue_a *const queue, int *const value)
     if (queue->pout == queue->pin)
         queue->is_empty = 1;
     return OK;
+}
+
+void print_queue(queue_l *const queue)
+{
+    if (queue->pout)
+        printf("queue->pout is %p\nqueue->pout->next is %p\nand queue->pin is %p\n", queue->pout, queue->pout->next, queue->pin);
+    node_t *tmp = queue->pout;
+    while (tmp)
+    {
+        printf("<%d>\n", tmp->data);
+        tmp = tmp->next;
+    }
 }
