@@ -6,6 +6,7 @@
 #define OVERFLOW_ERROR 1
 #define EMPTY_QUEUE 2
 #define INSERTION_ERROR 3
+#define LOST_APP 4
 
 // this function receives pointer on the tail of the queue and appends
 // one more element (returns new tail if successful else NULL)
@@ -32,14 +33,16 @@ node_t *push_l(queue_l *const queue, const int value)
 
 // this function inserts element on the pos position of the list queue (or in the end
 // if pos >= queue size)
-int ins_l(queue_l *const queue, const double value, const int pos)
+int ins_l(queue_l *const queue, const double value, const int pos, void **const address)
 {
+    int err_code = OK;
     if (queue->size >= QUEUE_SIZE)
     {
         // removing last element of the queue to insert the
         // element of the second type
         int val;
         pop_l(queue, &val);
+        err_code = LOST_APP;
     }
 
     if (queue->size <= pos)
@@ -47,14 +50,16 @@ int ins_l(queue_l *const queue, const double value, const int pos)
         node_t *res = push_l(queue, value);
         if (!res)
             return INSERTION_ERROR;
+        *address = (void *)res;
         queue->pin = res;
-        return OK;
+        return err_code;
     }
 
     int i;
     node_t *node = (node_t *)malloc(sizeof(node_t));
     if (!node)
         return INSERTION_ERROR;
+    *address = (void *)node;
 
     // insertion in the head of the queue
     if (pos == 0)
@@ -62,28 +67,27 @@ int ins_l(queue_l *const queue, const double value, const int pos)
         node->next = queue->pout;
         node->data = value;
         queue->pout = node;
-        return OK;
+        return err_code;
     }
 
     node_t *tmp;
     for (i = 0, tmp = queue->pout; i < pos - 1 && tmp->next; i++, tmp = tmp->next)
         ;
-    if (tmp->next)
-        node->next = tmp->next->next;
-    else
-        node->next = NULL;
+    queue->size++;
+    node->next = tmp->next;
     tmp->next = node;
     node->data = value;
-    return OK;
+    return err_code;
 }
 
 static void ring_array_insert(queue_a *const queue, const int value, const int pos)
 {
-    int i = (queue->pin > pos) ? queue->pin : queue->pin + QUEUE_SIZE;
-    while (i > pos)
+    int i = pos;
+    int limit = queue->pin > pos ? queue->pin : queue->pin + QUEUE_SIZE;
+    while (i < limit)
     {
-        queue->data[(i - 1) % QUEUE_SIZE] = queue->data[i % QUEUE_SIZE];
-        i--;
+        queue->data[(i + 1) % QUEUE_SIZE] = queue->data[i % QUEUE_SIZE];
+        i++;
     }
     queue->pin++;
     queue->data[i] = value;
@@ -97,16 +101,18 @@ int ins_a(queue_a *const queue, const int value, const int pos)
     // remove last element of the queue if the queue is full (to insert new element)
     if (!queue->is_empty && queue->pin == queue->pout)
     {
-        int *val = NULL;
-        pop_a(queue, val);
+        int val = 0;
+        pop_a(queue, &val);
         err_code = OVERFLOW_ERROR;
     }
     else
         err_code = OK;
+
     int i;
-    for (i = 0; i < pos && queue->pout + i < queue->pin; i++)
+    int limit = queue->pin > queue->pout ? queue->pin : queue->pin + QUEUE_SIZE;
+    for (i = 0; i < pos && queue->pout + i < limit; i++)
         ;
-    ring_array_insert(queue, value, i);
+    ring_array_insert(queue, value, queue->pout + i);
     return err_code;
 }
 

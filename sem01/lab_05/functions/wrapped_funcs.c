@@ -3,8 +3,10 @@
 #include "queue.h"
 #include "queue_cdio.h"
 #include "dynamic_array_utils.h"
+#include "stddef.h"
 
 #define OK 0
+#define LOST_APP 4
 
 // variables to check fragmentation
 int freed_zone = 0;
@@ -43,16 +45,27 @@ void wrapped_ins_l(queue_l *const queue, stat_t *const statistic,
                    timer_t *const pp_timer, array_d *const free_zones,
                    const int pos, const int value)
 {
-    int err_code = ins_l(queue, value, pos);
-    if (err_code == OK)
+    void *tmp = NULL;
+    int err_code = ins_l(queue, value, pos, &tmp);
+    if (err_code == OK || err_code == LOST_APP)
     {
         // updating info for average queue length
         statistic->len_sum += queue->size;
         statistic->check_num++;
-        // ending measuring time and updating stat???
+        // ending measuring time and updating stat (also updating info about
+        // free zones)
+        int pos;
+        if ((pos = is_in(free_zones, tmp)))
+        {
+            delete_element(free_zones, pos);
+            freed_zone++;
+        }
+        else
+            new_zone++;
+        // counting one more lost packet if it is lost
+        if (err_code == LOST_APP)
+            statistic->lost_apps++;
     }
-    else
-        statistic->lost_apps++;
 }
 
 int wrapped_pop_l(queue_l *const queue, stat_t *const statistic,

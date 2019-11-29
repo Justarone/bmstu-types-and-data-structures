@@ -16,17 +16,17 @@ typedef struct stat_t
     // process time
     double process_time;
     // average queue length check
-    unsigned int len_sum;   // sum of values of the queue, when deleting/adding element
-    unsigned int check_num; // amount of numbers in sum higher
+    int len_sum;   // sum of values of the queue, when deleting/adding element
+    int check_num; // amount of numbers in sum higher
     // total amount of applications come in
-    unsigned int in_amount[TYPES_AMOUNT];
+    int in_amount[TYPES_AMOUNT];
     // total time of work of the machine and number of applications
-    double work_time[TYPES_AMOUNT];        // total time of work of the machine
-    unsigned int out_amount[TYPES_AMOUNT]; // amount of done applications
+    double work_time[TYPES_AMOUNT]; // total time of work of the machine
+    int out_amount[TYPES_AMOUNT];   // amount of done applications
     // time of waiting of the machine
     double waiting_time;
     // lost applications (lost because of full queue or other errors of push function)
-    unsigned int lost_apps;
+    int lost_apps;
 } stat_t;
 
 typedef struct timer_t
