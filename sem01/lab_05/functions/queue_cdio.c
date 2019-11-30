@@ -83,7 +83,7 @@ int ins_l(queue_l *const queue, const double value, const int pos, void **const 
 static void ring_array_insert(queue_a *const queue, const int value, const int pos)
 {
     int limit = queue->pin >= pos ? queue->pin : queue->pin + QUEUE_SIZE;
-    int i = limit;
+    int i = limit - 1;
     while (i > pos)
     {
         queue->data[(i + 1) % QUEUE_SIZE] = queue->data[i % QUEUE_SIZE];
@@ -113,7 +113,7 @@ int ins_a(queue_a *const queue, const int value, const int pos)
     int limit = queue->pin >= queue->pout ? queue->pin : queue->pin + QUEUE_SIZE;
     for (i = 0; i < pos && queue->pout + i < limit; i++)
         ;
-    ring_array_insert(queue, value, queue->pout + i);
+    ring_array_insert(queue, value, (queue->pout + i) % QUEUE_SIZE);
     return err_code;
 }
 

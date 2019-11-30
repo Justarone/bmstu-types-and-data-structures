@@ -186,11 +186,11 @@ stat_t array_cycle(void)
     timer_t pp_timer = {}; // push-pop timer
 
     // this is push function with timer and statistic wrapper
-    printf("first insertion application of type2 in queue\n before:\n");
-    print_queue(&queue);
+    // printf("first insertion application of type2 in queue\n before:\n");
+    // print_queue(&queue);
     wrapped_ins_a(&queue, &statistic, &pp_timer, POS_2, TYPE_2);
-    printf("after:");
-    print_queue(&queue);
+    // printf("after:");
+    // print_queue(&queue);
     statistic.in_amount[TYPE_2]++;
     statistic.out_amount[TYPE_1]--;
 
@@ -210,11 +210,11 @@ stat_t array_cycle(void)
                 // updating the time (writing the time of coming of the next application)
                 times[QUEUE_INCOME_TIME] = RAND(INCOME1_BEG, INCOME1_END, ACCURACY);
                 // pushing new application of type 1
-                printf("push of the 1 type application\n before:\n");
-                print_queue(&queue);
+                // printf("push of the 1 type application\n before:\n");
+                // print_queue(&queue);
                 wrapped_push_a(&queue, &statistic, &pp_timer, TYPE_1);
-                printf("after:\n");
-                print_queue(&queue);
+                // printf("after:\n");
+                // print_queue(&queue);
             }
             // if the machine ended its work
             if (times[MACHINE_WORK_TIME] - EPS <= 0)
@@ -223,17 +223,17 @@ stat_t array_cycle(void)
                 if (last_in_machine == TYPE_2)
                 {
                     statistic.in_amount[TYPE_2]++;
-                    printf("insertion of the 2 type application not farer than 4 position\n before:\n");
-                    print_queue(&queue);
+                    // printf("insertion of the 2 type application not farer than 4 position\n before:\n");
+                    // print_queue(&queue);
                     wrapped_ins_a(&queue, &statistic, &pp_timer, POS_2, TYPE_2);
-                    printf("after:\n");
-                    print_queue(&queue);
+                    // printf("after:\n");
+                    // print_queue(&queue);
                 }
-                printf("pop of the next element of the queue\nbefore:\n");
-                print_queue(&queue);
+                // printf("pop of the next element of the queue\nbefore:\n");
+                // print_queue(&queue);
                 err_code = wrapped_pop_a(&queue, &statistic, &pp_timer, &value);
-                printf("after:\n");
-                print_queue(&queue);
+                // printf("after:\n");
+                // print_queue(&queue);
                 if (err_code != OK)
                 {
                     situation = WAIT_MODE;
