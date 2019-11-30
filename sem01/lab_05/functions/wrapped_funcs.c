@@ -21,6 +21,7 @@ void wrapped_push_l(queue_l *const queue, stat_t *const statistic,
     tmp = push_l(queue, value);
     if (tmp)
     {
+        queue->pout->data.income_time = statistic->process_time;
         queue->pin = tmp;
         // updating info for average queue length
         statistic->len_sum += queue->size;
@@ -46,7 +47,7 @@ void wrapped_ins_l(queue_l *const queue, stat_t *const statistic,
                    const int pos, const int value)
 {
     void *tmp = NULL;
-    int err_code = ins_l(queue, value, pos, &tmp);
+    int err_code = ins_l(queue, value, pos, &tmp, statistic->process_time);
     if (err_code == OK || err_code == LOST_APP)
     {
         // updating info for average queue length
@@ -74,6 +75,8 @@ int wrapped_pop_l(queue_l *const queue, stat_t *const statistic,
 {
     uint64_t start = tick();
     void *address = queue->pout;
+    if (queue->pout)
+        statistic->all_queue_times[queue->pout->data.value] += statistic->process_time - queue->pout->data.income_time;
     int err_code = pop_l(queue, value);
     if (err_code == OK)
     {
@@ -95,6 +98,7 @@ int wrapped_push_a(queue_a *const queue, stat_t *const statistic,
     int err_code = push_a(queue, value);
     if (err_code == OK)
     {
+        queue->data[queue->pout].income_time = statistic->process_time;
         // updating info for average queue length
         statistic->len_sum += (queue->pin > queue->pout) ? queue->pin - queue->pout : queue->pin + QUEUE_SIZE - queue->pout;
         statistic->check_num++;
@@ -110,7 +114,7 @@ int wrapped_push_a(queue_a *const queue, stat_t *const statistic,
 void wrapped_ins_a(queue_a *const queue, stat_t *const statistic,
                    timer_t *const pp_timer, const int pos, const int value)
 {
-    int err_code = ins_a(queue, value, pos);
+    int err_code = ins_a(queue, value, pos, statistic->process_time);
     if (err_code == OK)
     {
         // updating info for average queue length
@@ -125,6 +129,8 @@ int wrapped_pop_a(queue_a *const queue, stat_t *const statistic,
                   timer_t *const pp_timer, int *const value)
 {
     uint64_t start = tick();
+    if (!queue->is_empty)
+        statistic->all_queue_times[queue->data[queue->pout].value] += statistic->process_time - queue->data[queue->pout].income_time;
     int err_code = pop_a(queue, value);
     if (err_code == OK)
     {

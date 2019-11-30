@@ -27,6 +27,9 @@ typedef struct stat_t
     double waiting_time;
     // lost applications (lost because of full queue or other errors of push function)
     int lost_apps;
+    // sum of all times which applications are standing in the queue
+    double all_queue_times[TYPES_AMOUNT];
+
 } stat_t;
 
 typedef struct timer_t

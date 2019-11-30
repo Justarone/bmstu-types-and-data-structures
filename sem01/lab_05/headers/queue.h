@@ -3,9 +3,15 @@
 
 #define QUEUE_SIZE 100
 
+typedef struct elem_t
+{
+    int value;
+    double income_time;
+} elem_t;
+
 typedef struct node_t
 {
-    int data;
+    elem_t data;
     struct node_t *next;
 } node_t;
 
@@ -21,10 +27,10 @@ typedef struct
 
 typedef struct
 {
-    int data[QUEUE_SIZE]; // pointer on the dynamic array, which contains elements of the queue
-    int is_empty;         // variable to check the queue overflow
-    int pin;              // index of the place to come in the queue
-    int pout;             // index of the place to come out from the queue
+    elem_t data[QUEUE_SIZE]; // pointer on the dynamic array, which contains elements of the queue
+    int is_empty;            // variable to check the queue overflow
+    int pin;                 // index of the place to come in the queue
+    int pout;                // index of the place to come out from the queue
 } queue_a;
 
 #endif
