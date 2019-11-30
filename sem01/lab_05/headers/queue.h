@@ -21,10 +21,10 @@ typedef struct
 
 typedef struct
 {
-    double data[QUEUE_SIZE]; // pointer on the dynamic array, which contains elements of the queue
-    int is_empty;            // variable to check the queue overflow
-    int pin;                 // index of the place to come in the queue
-    int pout;                // index of the place to come out from the queue
+    int data[QUEUE_SIZE]; // pointer on the dynamic array, which contains elements of the queue
+    int is_empty;         // variable to check the queue overflow
+    int pin;              // index of the place to come in the queue
+    int pout;             // index of the place to come out from the queue
 } queue_a;
 
 #endif

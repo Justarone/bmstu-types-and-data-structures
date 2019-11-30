@@ -9,7 +9,7 @@
 int main()
 {
     array_d free_zones = {};
-    free_zones.data = (void **)malloc(MAX_FREE_ZONES * sizeof(void *));
+    free_zones.data = (void **)calloc(MAX_FREE_ZONES, sizeof(void *));
     free_zones.mem_size = MAX_FREE_ZONES;
 
     stat_t statistic;

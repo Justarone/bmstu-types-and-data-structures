@@ -82,15 +82,15 @@ int ins_l(queue_l *const queue, const double value, const int pos, void **const 
 
 static void ring_array_insert(queue_a *const queue, const int value, const int pos)
 {
-    int i = pos;
-    int limit = queue->pin > pos ? queue->pin : queue->pin + QUEUE_SIZE;
-    while (i < limit)
+    int limit = queue->pin >= pos ? queue->pin : queue->pin + QUEUE_SIZE;
+    int i = limit;
+    while (i > pos)
     {
         queue->data[(i + 1) % QUEUE_SIZE] = queue->data[i % QUEUE_SIZE];
-        i++;
+        i--;
     }
-    queue->pin++;
-    queue->data[i] = value;
+    queue->pin = (queue->pin + 1) % QUEUE_SIZE;
+    queue->data[pos] = value;
 }
 
 // this functions inserts the value element on the pos position in the
@@ -109,7 +109,8 @@ int ins_a(queue_a *const queue, const int value, const int pos)
         err_code = OK;
 
     int i;
-    int limit = queue->pin > queue->pout ? queue->pin : queue->pin + QUEUE_SIZE;
+    queue->is_empty = 0;
+    int limit = queue->pin >= queue->pout ? queue->pin : queue->pin + QUEUE_SIZE;
     for (i = 0; i < pos && queue->pout + i < limit; i++)
         ;
     ring_array_insert(queue, value, queue->pout + i);
@@ -161,14 +162,24 @@ int pop_a(queue_a *const queue, int *const value)
     return OK;
 }
 
-void print_queue(queue_l *const queue)
+// void print_queue(queue_l *const queue)
+// {
+//     if (queue->pout)
+//         printf("queue->pout is %p\nqueue->pout->next is %p\nand queue->pin is %p\n", queue->pout, queue->pout->next, queue->pin);
+//     node_t *tmp = queue->pout;
+//     while (tmp)
+//     {
+//         printf("<%d>\n", tmp->data);
+//         tmp = tmp->next;
+//     }
+// }
+
+void print_queue(const queue_a *const queue)
 {
-    if (queue->pout)
-        printf("queue->pout is %p\nqueue->pout->next is %p\nand queue->pin is %p\n", queue->pout, queue->pout->next, queue->pin);
-    node_t *tmp = queue->pout;
-    while (tmp)
-    {
-        printf("<%d>\n", tmp->data);
-        tmp = tmp->next;
-    }
+    printf("pout = %d; pin = %d\n", queue->pout, queue->pin);
+    if (queue->is_empty)
+        return;
+    int limit = (queue->pin > queue->pout) ? queue->pin : queue->pin + QUEUE_SIZE;
+    for (int i = queue->pout; i < limit; i++)
+        printf("%d \n", queue->data[i % QUEUE_SIZE]);
 }
