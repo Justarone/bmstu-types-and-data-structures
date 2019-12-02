@@ -154,9 +154,12 @@ stat_t list_cycle(array_d *const free_zones)
             // printf("\nqueue_size = %d\n", queue.size);
         }
     }
-    printf("\n\nВзято из новой области: %d\nВзято из старой области: %d\n\n",
+    printf("\n\n\033[1;35mВзято из новой области: %d\nВзято из старой области: %d\n\n",
            new_zone, freed_zone);
-
+    printf("Время работы функций:\npush: %ld операций за %ju тиков;\n"
+           "pop: %ld операций за %ju тиков\n\n",
+           pp_timer.opers_count[PUSH], pp_timer.time[PUSH],
+           pp_timer.opers_count[POP], pp_timer.time[POP]);
     // clean list
     node_t *tmp;
     while (queue.pout)
@@ -274,5 +277,9 @@ stat_t array_cycle(void)
             print_stat(&statistic);
         }
     }
+    printf("\n\n\033[1;35mВремя работы функций:\npush: %ld операций за %ju тиков;\n"
+           "pop: %ld операций за %ju тиков\n\n",
+           pp_timer.opers_count[PUSH], pp_timer.time[PUSH],
+           pp_timer.opers_count[POP], pp_timer.time[POP]);
     return statistic;
 }
