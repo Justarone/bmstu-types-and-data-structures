@@ -4,7 +4,7 @@
 #include "array.h"
 #include "additional_structs.h"
 
-stat_t list_cycle(array_d *const free_zones);
-stat_t array_cycle(void);
+void list_cycle(array_d *const free_zones);
+void array_cycle(void);
 
 #endif

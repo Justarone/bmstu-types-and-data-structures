@@ -52,6 +52,7 @@ int ins_l(queue_l *const queue, const double value, const int pos, void **const 
             return INSERTION_ERROR;
         *address = (void *)res;
         queue->pin = res;
+        res->data.income_time = income_time;
         return err_code;
     }
 
@@ -78,6 +79,7 @@ int ins_l(queue_l *const queue, const double value, const int pos, void **const 
     node->next = tmp->next;
     tmp->next = node;
     node->data.value = value;
+    node->data.income_time = income_time;
     return err_code;
 }
 
@@ -85,7 +87,7 @@ static void ring_array_insert(queue_a *const queue, const int value, const int p
 {
     int limit = queue->pin >= pos ? queue->pin : queue->pin + QUEUE_SIZE;
     int i = limit - 1;
-    while (i > pos)
+    while (i >= pos)
     {
         queue->data[(i + 1) % QUEUE_SIZE] = queue->data[i % QUEUE_SIZE];
         i--;
@@ -112,7 +114,7 @@ int ins_a(queue_a *const queue, const int value, const int pos, const double inc
     int i;
     queue->is_empty = 0;
     int limit = queue->pin >= queue->pout ? queue->pin : queue->pin + QUEUE_SIZE;
-    for (i = 0; i < pos && queue->pout + i < limit; i++)
+    for (i = 0; i < pos + 1 && queue->pout + i < limit; i++)
         ;
     ring_array_insert(queue, value, (queue->pout + i) % QUEUE_SIZE);
     queue->data[(queue->pout + i) % QUEUE_SIZE].income_time = income_time;
@@ -164,17 +166,17 @@ int pop_a(queue_a *const queue, int *const value)
     return OK;
 }
 
-// void print_queue(queue_l *const queue)
-// {
-//     if (queue->pout)
-//         printf("queue->pout is %p\nqueue->pout->next is %p\nand queue->pin is %p\n", queue->pout, queue->pout->next, queue->pin);
-//     node_t *tmp = queue->pout;
-//     while (tmp)
-//     {
-//         printf("<%d>\n", tmp->data);
-//         tmp = tmp->next;
-//     }
-// }
+void print_queue_l(queue_l *const queue)
+{
+    if (queue->pout)
+        printf("queue->pout is %p\nqueue->pout->next is %p\nand queue->pin is %p\n", queue->pout, queue->pout->next, queue->pin);
+    node_t *tmp = queue->pout;
+    while (tmp)
+    {
+        printf("<%d>\n", tmp->data.value);
+        tmp = tmp->next;
+    }
+}
 
 void print_queue(const queue_a *const queue)
 {
@@ -183,5 +185,5 @@ void print_queue(const queue_a *const queue)
         return;
     int limit = (queue->pin > queue->pout) ? queue->pin : queue->pin + QUEUE_SIZE;
     for (int i = queue->pout; i < limit; i++)
-        printf("%d \n", queue->data[i % QUEUE_SIZE].value);
+        printf("%d %lf\n", queue->data[i % QUEUE_SIZE].value, queue->data[i % QUEUE_SIZE].income_time);
 }

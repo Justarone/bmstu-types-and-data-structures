@@ -12,5 +12,5 @@ int pop_l(queue_l *const queue, int *const value);
 int pop_a(queue_a *const queue, int *const value);
 // void print_queue(queue_l *const queue);
 void print_queue(const queue_a *const queue);
-
+void print_queue_l(queue_l *const queue);
 #endif

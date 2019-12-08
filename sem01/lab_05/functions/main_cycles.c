@@ -8,6 +8,7 @@
 #include "wrapped_funcs.h"
 #include "output_funcs.h"
 #include <stdio.h>
+#include <time.h>
 
 // this macros generates random number from BEG to END with some accuracy
 // accuracy sets like 0.01, 0.001 etc.
@@ -20,7 +21,7 @@
 // constants for experiment (ps: BEG, END - borders for rand values)
 #define SEED 17
 #define INCOME1_BEG 0
-#define INCOME1_END 5
+#define INCOME1_END 6
 #define WORK1_BEG 0
 #define WORK1_END 4
 #define WORK2_BEG 0
@@ -45,7 +46,7 @@
 extern int freed_zone;
 extern int new_zone;
 
-stat_t list_cycle(array_d *const free_zones)
+void list_cycle(array_d *const free_zones)
 {
     // firstly we need to set random to return the same values for both processes
     srand(SRAND_SEED);
@@ -64,10 +65,10 @@ stat_t list_cycle(array_d *const free_zones)
 
     // this is insert function with timer and statistic wrapper
     // printf("before first insert:\n");
-    // print_queue(&queue);
+    // print_queue_l(&queue);
     wrapped_ins_l(&queue, &statistic, &pp_timer, free_zones, POS_2, TYPE_2);
     // printf("after first insert:\n");
-    // print_queue(&queue);
+    // print_queue_l(&queue);
     statistic.in_amount[TYPE_2]++;
     // for the first time the machine is empty but we count like the first
     // type of application was there, so we need to remove one
@@ -79,6 +80,7 @@ stat_t list_cycle(array_d *const free_zones)
     int i = 1;
     while (statistic.out_amount[TYPE_1] < APPS_AMOUNT)
     {
+        printf("iteration: %d\n", statistic.out_amount[TYPE_1]);
         switch (situation)
         {
         case NORMAL:
@@ -90,10 +92,10 @@ stat_t list_cycle(array_d *const free_zones)
                 times[QUEUE_INCOME_TIME] = RAND(INCOME1_BEG, INCOME1_END, ACCURACY);
                 // pushing new application of type 1
                 // printf("before pushing TYPE_1:\n");
-                // print_queue(&queue);
+                // print_queue_l(&queue);
                 wrapped_push_l(&queue, &statistic, &pp_timer, free_zones, TYPE_1);
                 // printf("after pushing type1:\n");
-                // print_queue(&queue);
+                // print_queue_l(&queue);
             }
             // if the machine ended its work
             if (times[MACHINE_WORK_TIME] - EPS <= 0)
@@ -103,16 +105,16 @@ stat_t list_cycle(array_d *const free_zones)
                 {
                     statistic.in_amount[TYPE_2]++;
                     // printf("before inserting type2:\n");
-                    // print_queue(&queue);
+                    // print_queue_l(&queue);
                     wrapped_ins_l(&queue, &statistic, &pp_timer, free_zones, POS_2, TYPE_2);
                     // printf("after inserting type2:\n");
-                    // print_queue(&queue);
+                    // print_queue_l(&queue);
                 }
                 // printf("before popping element form the queue:\n");
-                // print_queue(&queue);
+                // print_queue_l(&queue);
                 err_code = wrapped_pop_l(&queue, &statistic, &pp_timer, free_zones, &value);
                 // printf("after popping element from the queue:\n");
-                // print_queue(&queue);
+                // print_queue_l(&queue);
                 if (err_code != OK)
                 {
                     situation = WAIT_MODE;
@@ -124,7 +126,8 @@ stat_t list_cycle(array_d *const free_zones)
                 else
                     times[MACHINE_WORK_TIME] = RAND(WORK2_BEG, WORK2_END, ACCURACY);
             }
-
+            // printf("MAKING DIFF: income: %lf, outcome: %lf\n", times[QUEUE_INCOME_TIME],
+            //        times[MACHINE_WORK_TIME]);
             double time = MIN(times[MACHINE_WORK_TIME], times[QUEUE_INCOME_TIME]);
             times[MACHINE_WORK_TIME] -= time;
             times[QUEUE_INCOME_TIME] -= time;
@@ -168,10 +171,9 @@ stat_t list_cycle(array_d *const free_zones)
         queue.pout = queue.pout->next;
         free(tmp);
     }
-    return statistic;
 }
 
-stat_t array_cycle(void)
+void array_cycle(void)
 {
     srand(SRAND_SEED);
     int situation = NORMAL; // helps to classificate situations (like `machine is working`
@@ -203,34 +205,39 @@ stat_t array_cycle(void)
     int i = 1;
     while (statistic.out_amount[TYPE_1] < APPS_AMOUNT)
     {
+        // printf("iteration: %d\n", statistic.out_amount[TYPE_1]);
         switch (situation)
         {
         case NORMAL:
             // if the time of coming of the new application has come
             if (times[QUEUE_INCOME_TIME] - EPS <= 0)
             {
+                // printf("income: %lf, outcome: %lf\n", times[QUEUE_INCOME_TIME],
+                //        times[MACHINE_WORK_TIME]);
                 statistic.in_amount[TYPE_1]++;
                 // updating the time (writing the time of coming of the next application)
                 times[QUEUE_INCOME_TIME] = RAND(INCOME1_BEG, INCOME1_END, ACCURACY);
                 // pushing new application of type 1
-                // printf("push of the 1 type application\n before:\n");
-                // print_queue(&queue);
+                printf("push of the 1 type application\n before:\n");
+                print_queue(&queue);
                 wrapped_push_a(&queue, &statistic, &pp_timer, TYPE_1);
-                // printf("after:\n");
-                // print_queue(&queue);
+                printf("after:\n");
+                print_queue(&queue);
             }
             // if the machine ended its work
             if (times[MACHINE_WORK_TIME] - EPS <= 0)
             {
+                // printf("income: %lf, outcome: %lf\n", times[QUEUE_INCOME_TIME],
+                //        times[MACHINE_WORK_TIME]);
                 statistic.out_amount[last_in_machine]++;
                 if (last_in_machine == TYPE_2)
                 {
                     statistic.in_amount[TYPE_2]++;
-                    // printf("insertion of the 2 type application not farer than 4 position\n before:\n");
-                    // print_queue(&queue);
+                    printf("insertion of the 2 type application not farer than 4 position\n before:\n");
+                    print_queue(&queue);
                     wrapped_ins_a(&queue, &statistic, &pp_timer, POS_2, TYPE_2);
-                    // printf("after:\n");
-                    // print_queue(&queue);
+                    printf("after:\n");
+                    print_queue(&queue);
                 }
                 // printf("pop of the next element of the queue\nbefore:\n");
                 // print_queue(&queue);
@@ -248,7 +255,8 @@ stat_t array_cycle(void)
                 else
                     times[MACHINE_WORK_TIME] = RAND(WORK2_BEG, WORK2_END, ACCURACY);
             }
-
+            // printf("MAKING DIFF: income: %lf, outcome: %lf\n", times[QUEUE_INCOME_TIME],
+            //        times[MACHINE_WORK_TIME]);
             double time = MIN(times[MACHINE_WORK_TIME], times[QUEUE_INCOME_TIME]);
             times[MACHINE_WORK_TIME] -= time;
             times[QUEUE_INCOME_TIME] -= time;
@@ -281,5 +289,4 @@ stat_t array_cycle(void)
            "pop: %ld операций за %ju тиков\n\n",
            pp_timer.opers_count[PUSH], pp_timer.time[PUSH],
            pp_timer.opers_count[POP], pp_timer.time[POP]);
-    return statistic;
 }

@@ -21,8 +21,9 @@ void wrapped_push_l(queue_l *const queue, stat_t *const statistic,
     tmp = push_l(queue, value);
     if (tmp)
     {
-        queue->pout->data.income_time = statistic->process_time;
         queue->pin = tmp;
+        queue->pin->data.income_time = statistic->process_time;
+
         // updating info for average queue length
         statistic->len_sum += queue->size;
         statistic->check_num++;
@@ -98,9 +99,10 @@ int wrapped_push_a(queue_a *const queue, stat_t *const statistic,
     int err_code = push_a(queue, value);
     if (err_code == OK)
     {
-        queue->data[queue->pout].income_time = statistic->process_time;
+        queue->data[queue->pin == 0 ? QUEUE_SIZE - 1 : queue->pin - 1].income_time = statistic->process_time;
         // updating info for average queue length
-        statistic->len_sum += (queue->pin > queue->pout) ? queue->pin - queue->pout : queue->pin + QUEUE_SIZE - queue->pout;
+        if (!queue->is_empty)
+            statistic->len_sum += (queue->pin >= queue->pout) ? queue->pin - queue->pout : queue->pin + QUEUE_SIZE - queue->pout;
         statistic->check_num++;
         // ending measuring time and updating stat
         pp_timer->time[PUSH] += tick() - start;
@@ -114,11 +116,12 @@ int wrapped_push_a(queue_a *const queue, stat_t *const statistic,
 void wrapped_ins_a(queue_a *const queue, stat_t *const statistic,
                    timer_t *const pp_timer, const int pos, const int value)
 {
-    int err_code = ins_a(queue, value, pos, statistic->process_time);
+    int err_code = ins_a(queue, value, pos - 1, statistic->process_time);
     if (err_code == OK)
     {
         // updating info for average queue length
-        statistic->len_sum += (queue->pin > queue->pout) ? queue->pin - queue->pout : queue->pin + QUEUE_SIZE - queue->pout;
+        if (!queue->is_empty)
+            statistic->len_sum += (queue->pin >= queue->pout) ? queue->pin - queue->pout : queue->pin + QUEUE_SIZE - queue->pout;
         statistic->check_num++;
     }
     else
@@ -134,12 +137,12 @@ int wrapped_pop_a(queue_a *const queue, stat_t *const statistic,
     int err_code = pop_a(queue, value);
     if (err_code == OK)
     {
-        // updating info for average queue length
-        statistic->len_sum += (queue->pin > queue->pout) ? queue->pin - queue->pout : queue->pin + QUEUE_SIZE - queue->pout;
-        statistic->check_num++;
-        // ending measuring time and updating stat
         pp_timer->time[POP] += tick() - start;
         pp_timer->opers_count[POP]++;
+        // updating info for average queue length
+        if (!queue->is_empty)
+            statistic->len_sum += (queue->pin >= queue->pout) ? queue->pin - queue->pout : queue->pin + QUEUE_SIZE - queue->pout;
+        statistic->check_num++;
     }
     return err_code;
 }
