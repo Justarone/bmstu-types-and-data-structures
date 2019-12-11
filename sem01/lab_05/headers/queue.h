@@ -20,9 +20,9 @@ typedef struct node_t
 // pointer on the first element in the queue)
 typedef struct
 {
-    node_t *pin;  // tail of the queue
-    node_t *pout; // head of the queue
-    int size;     // size of the queue
+    node_t *pin;  // tail
+    node_t *pout; // head
+    int size;     // size
 } queue_l;
 
 typedef struct
