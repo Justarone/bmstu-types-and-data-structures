@@ -41,7 +41,7 @@
 // position to insert the application of type 2
 #define POS_2 3
 
-#define SRAND_SEED 17
+#define SRAND_SEED 10
 
 extern int freed_zone;
 extern int new_zone;
@@ -80,7 +80,7 @@ void list_cycle(array_d *const free_zones)
     int i = 1;
     while (statistic.out_amount[TYPE_1] < APPS_AMOUNT)
     {
-        printf("iteration: %d\n", statistic.out_amount[TYPE_1]);
+        // printf("iteration: %d\n", statistic.out_amount[TYPE_1]);
         switch (situation)
         {
         case NORMAL:
@@ -218,11 +218,11 @@ void array_cycle(void)
                 // updating the time (writing the time of coming of the next application)
                 times[QUEUE_INCOME_TIME] = RAND(INCOME1_BEG, INCOME1_END, ACCURACY);
                 // pushing new application of type 1
-                printf("push of the 1 type application\n before:\n");
-                print_queue(&queue);
+                // printf("push of the 1 type application\n before:\n");
+                // print_queue(&queue);
                 wrapped_push_a(&queue, &statistic, &pp_timer, TYPE_1);
-                printf("after:\n");
-                print_queue(&queue);
+                // printf("after:\n");
+                // print_queue(&queue);
             }
             // if the machine ended its work
             if (times[MACHINE_WORK_TIME] - EPS <= 0)
@@ -233,11 +233,11 @@ void array_cycle(void)
                 if (last_in_machine == TYPE_2)
                 {
                     statistic.in_amount[TYPE_2]++;
-                    printf("insertion of the 2 type application not farer than 4 position\n before:\n");
-                    print_queue(&queue);
+                    // printf("insertion of the 2 type application not farer than 4 position\n before:\n");
+                    // print_queue(&queue);
                     wrapped_ins_a(&queue, &statistic, &pp_timer, POS_2, TYPE_2);
-                    printf("after:\n");
-                    print_queue(&queue);
+                    // printf("after:\n");
+                    // print_queue(&queue);
                 }
                 // printf("pop of the next element of the queue\nbefore:\n");
                 // print_queue(&queue);
