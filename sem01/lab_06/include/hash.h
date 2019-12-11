@@ -1,35 +1,24 @@
 #ifndef _HASH_H_
 #define _HASH_H_
 
-// you'd better choose the simple number for the size
-#define TABLE_SIZE 113
-
-// struct for closed hashing
-// typedef struct hash_c
-// {
-//     char *table[TABLE_SIZE];
-// } hash_c;
-
-// struct of an element of closed hashing
-typedef struct node_o
+typedef struct node_h
 {
     char *data;
-    struct node_o *next;
-} node_o;
+    struct node_h *next;
+} node_h;
 
-// struct for opened hashing
-// typedef struct hash_o
-// {
-//     node_o *table[TABLE_SIZE];
-// } hash_o;
+// table is array of pointers on the nodes (array *, on node_h *)
+typedef struct hash_t
+{
+    node_h **data;
+    int base;
+} hash_t;
 
-// FUNCTIONS
-
-int add_c(char **const table, const char *const key);
-int get_c(char **const table, const char *const key);
-int remove_c(char **const table, const char *const key);
-int add_o(node_o **const table, const char *const key);
-int get_o(node_o **const table, const char *const key);
-int remove_o(node_o **const table, const char *const key);
+hash_t *init_table(const int base);
+int rebase(hash_t *table, const int new_base);
+int add(hash_t *const table, const char *const key);
+int get(hash_t *const table, const char *const key);
+int remove(hash_t *const table, const char *const key);
+void destruct_table(hash_t *table);
 
 #endif

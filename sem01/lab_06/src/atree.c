@@ -1,10 +1,10 @@
-#include "atree.h"
+#include "trees.h"
 #include <stdlib.h>
 #include <string.h>
 
-anode_t *create_node(const char *const value)
+node_t *create_node(const char *const value)
 {
-    anode_t *node = (anode_t *)malloc(sizeof(anode_t));
+    node_t *node = (node_t *)malloc(sizeof(node_t));
     if (!node)
         return NULL;
 
@@ -16,10 +16,11 @@ anode_t *create_node(const char *const value)
         free(node);
         return NULL;
     }
+    strcpy(node->value, value);
     return node;
 }
 
-static void free_node(anode_t *node)
+void free_node(node_t *node)
 {
     free(node->value);
     free(node);
@@ -27,18 +28,18 @@ static void free_node(anode_t *node)
 
 // возвращает высоту, если послали ненулевой указатель, а
 // если нулевой, то высота 0
-static unsigned int height(anode_t *p)
+static unsigned int height(node_t *p)
 {
     return p ? p->height : 0;
 }
 
 // расчет коэффициента балансировки
-static int balance_factor(anode_t *p)
+static int balance_factor(node_t *p)
 {
     return height(p->right) - height(p->left);
 }
 
-void fix_height(anode_t *p)
+void fix_height(node_t *p)
 {
     unsigned int hl = height(p->left);
     unsigned int hr = height(p->right);
@@ -47,9 +48,9 @@ void fix_height(anode_t *p)
 
 // функция возвращает новую вершину
 // поворот направо вокруг p
-static anode_t *rotate_right(anode_t *p)
+static node_t *rotate_right(node_t *p)
 {
-    anode_t *q = p->left;
+    node_t *q = p->left;
     p->left = q->right;
     q->right = p;
     fix_height(p);
@@ -59,9 +60,9 @@ static anode_t *rotate_right(anode_t *p)
 
 // функция возвращает новую вершину
 // поворот налево вокруг q
-static anode_t *rotate_left(anode_t *q)
+static node_t *rotate_left(node_t *q)
 {
-    anode_t *p = q->right;
+    node_t *p = q->right;
     q->right = p->left;
     p->left = q;
     fix_height(q);
@@ -70,7 +71,7 @@ static anode_t *rotate_left(anode_t *q)
 }
 
 //
-static anode_t *balance(anode_t *p)
+static node_t *balance(node_t *p)
 {
     fix_height(p);
 
@@ -91,7 +92,7 @@ static anode_t *balance(anode_t *p)
     return p;
 }
 
-anode_t *insert(anode_t *p, const char *const value) // вставка ключа k в дерево с корнем p
+node_t *insert(node_t *p, const char *const value) // вставка ключа k в дерево с корнем p
 {
     if (!p)
         return create_node(value);
@@ -105,12 +106,12 @@ anode_t *insert(anode_t *p, const char *const value) // вставка ключ�
     return balance(p);
 }
 
-static anode_t *find_min(anode_t *p) // поиск узла с минимальным ключом в дереве p
+node_t *find_min(node_t *p) // поиск узла с минимальным ключом в дереве p
 {
     return p->left ? find_min(p->left) : p;
 }
 
-static anode_t *remove_min(anode_t *p) // удаление узла с минимальным ключом из дерева p
+node_t *remove_min(node_t *p) // удаление узла с минимальным ключом из дерева p
 {
     if (!p->left)
         return p->right;
@@ -118,7 +119,7 @@ static anode_t *remove_min(anode_t *p) // удаление узла с мини�
     return balance(p);
 }
 
-anode_t *remove(anode_t *p, const char *const value) // удаление ключа value из дерева p
+node_t *remove(node_t *p, const char *const value) // удаление ключа value из дерева p
 {
     if (!p)
         return NULL;
@@ -131,12 +132,12 @@ anode_t *remove(anode_t *p, const char *const value) // удаление клю�
 
     else //  k == p->key
     {
-        anode_t *q = p->left;
-        anode_t *r = p->right;
+        node_t *q = p->left;
+        node_t *r = p->right;
         free_node(p);
         if (!r)
             return q;
-        anode_t *min = find_min(r);
+        node_t *min = find_min(r);
         min->right = remove_min(r);
         min->left = q;
         return balance(min);
@@ -144,7 +145,7 @@ anode_t *remove(anode_t *p, const char *const value) // удаление клю�
     return balance(p);
 }
 
-void clean_atree(anode_t *vertex)
+void clean_atree(node_t *vertex)
 {
     while (vertex = remove(vertex, vertex->value))
         ;
