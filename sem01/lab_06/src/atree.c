@@ -1,6 +1,7 @@
 #include "trees.h"
 #include <stdlib.h>
 #include <string.h>
+#include "additional_structs.h"
 
 node_t *create_node(const char *const value)
 {
@@ -119,16 +120,22 @@ node_t *remove_min(node_t *p) // удаление узла с минимальн
     return balance(p);
 }
 
-node_t *remove_a(node_t *p, const char *const value) // удаление ключа value из дерева p
+node_t *remove_a(node_t *p, const char *const value, stat_t *const stat) // удаление ключа value из дерева p
 {
     if (!p)
         return NULL;
 
     if (strcmp(p->value, value) > 0)
-        p->left = remove_a(p->left, value);
+    {
+        ++stat->comp_num;
+        p->left = remove_a(p->left, value, stat);
+    }
 
     else if (strcmp(p->value, value) < 0)
-        p->right = remove_a(p->right, value);
+    {
+        ++stat->comp_num;
+        p->right = remove_a(p->right, value, stat);
+    }
 
     else //  k == p->key
     {
@@ -149,6 +156,8 @@ void clean_atree(node_t *vertex)
 {
     if (!vertex)
         return;
-    while ((vertex = remove_a(vertex, vertex->value)))
-        ;
+    clean_atree(vertex->left);
+    clean_atree(vertex->right);
+    free(vertex->value);
+    free(vertex);
 }

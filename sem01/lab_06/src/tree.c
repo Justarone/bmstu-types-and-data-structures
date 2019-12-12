@@ -27,16 +27,22 @@ node_t *insert_b(node_t *vertex, const char *const value)
     return vertex;
 }
 
-node_t *remove_b(node_t *vertex, const char *const value)
+node_t *remove_b(node_t *vertex, const char *const value, stat_t *const stat)
 {
     if (!vertex)
         return NULL;
 
     if (strcmp(vertex->value, value) > 0)
-        vertex->left = remove_b(vertex->left, value);
+    {
+        stat->comp_num++;
+        vertex->left = remove_b(vertex->left, value, stat);
+    }
 
     else if (strcmp(vertex->value, value) < 0)
-        vertex->right = remove_b(vertex->right, value);
+    {
+        stat->comp_num++;
+        vertex->right = remove_b(vertex->right, value, stat);
+    }
 
     else //  k == p->key
     {
@@ -57,6 +63,8 @@ void clean_tree(node_t *vertex)
 {
     if (!vertex)
         return;
-    while ((vertex = remove_b(vertex, vertex->value)))
-        ;
+    clean_atree(vertex->left);
+    clean_atree(vertex->right);
+    free(vertex->value);
+    free(vertex);
 }

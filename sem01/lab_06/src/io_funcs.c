@@ -4,19 +4,24 @@
 
 #define READED 1
 #define BUFF_LEN 255
+#define TREE 0
+#define ATREE 1
+#define HASH_TABLE 2
+#define FILE_LIST 3
 
 char buffer[BUFF_LEN] = {0};
 
 void print_menu()
 {
-    printf("MENU\n"
+    printf("\n\n\033[1;29mMENU\n"
            "0. Exit;\n"
            "1. Read data from file;\n"
            "2. Delete word;\n"
            "3. Show binary tree;\n"
            "4. Show AUS-tree;\n"
            "5. Show hash-table;\n"
-           "6. Show comparison\n");
+           "6. Show comparison;\n"
+           "\nInput: ");
 }
 
 // ввод хэш таблицы
@@ -83,4 +88,20 @@ void print_tree(const node_t *const vertex, const int depth)
     print_vertex(vertex, depth);
     print_tree(vertex->left, depth + 1);
     printf("\033[1;29m");
+}
+
+void print_stat(const stat_t *const stat_array)
+{
+    printf("For simple binary tree:\n");
+    printf("Number of comparisons: %d;\nTime: %ld ticks;\n",
+           stat_array[TREE].comp_num, stat_array[TREE].time);
+    printf("For AUS-tree:\n");
+    printf("Number of comparisons: %d;\nTime: %ld ticks;\n",
+           stat_array[ATREE].comp_num, stat_array[ATREE].time);
+    printf("For hash-table:\n");
+    printf("Number of comparisons: %d;\nTime: %ld ticks;\n",
+           stat_array[HASH_TABLE].comp_num, stat_array[HASH_TABLE].time / 2);
+    printf("For file:\n");
+    printf("Number of comparisons: %d;\nTime: %ld ticks;\n",
+           stat_array[FILE_LIST].comp_num, stat_array[FILE_LIST].time);
 }

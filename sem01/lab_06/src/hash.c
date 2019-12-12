@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include "timer.h"
 
 #define OK 0
 #define GET_ERROR -2
@@ -102,7 +103,7 @@ int hash_function(const char *const key, const int base)
         return ARG_ERROR;
     int sum = 0, i = -1;
     while (key[++i])
-        sum += key[i] * (i + 1) * (i + 1);
+        sum += key[i];
     return sum % base;
 }
 
@@ -181,17 +182,17 @@ int get(hash_t *const table, const char *const key)
     return GET_ERROR;
 }
 
-int remove_h(hash_t *const table, const char *const key)
+int remove_h(hash_t *const table, const char *const key, stat_t *const stat)
 {
     if (!key || !table)
         return REMOVE_ERROR;
 
     int pos = hash_function(key, table->base);
-
     node_h *elem = table->data[pos];
     if (!elem)
         return REMOVE_ERROR;
 
+    ++stat->comp_num;
     if (!strcmp(elem->data, key))
     {
         elem = elem->next;
@@ -202,6 +203,7 @@ int remove_h(hash_t *const table, const char *const key)
     }
     while (elem->next)
     {
+        ++stat->comp_num;
         if (!strcmp(elem->next->data, key))
         {
             node_h *tmp = elem->next->next;
@@ -210,6 +212,7 @@ int remove_h(hash_t *const table, const char *const key)
             elem->next = tmp;
             return OK;
         }
+        elem = elem->next;
     }
     return REMOVE_ERROR;
 }
