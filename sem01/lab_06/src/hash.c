@@ -15,25 +15,25 @@
 #define COLLISION_MAX 3
 
 // this function find the least number which is simple but bigger than num
-static int next_simple(const int num)
-{
-    int flag;
-    int limit, current = num + 1 + (num % 2);
-    while (1)
-    {
-        flag = 1;
-        limit = sqrt(current) + 1;
-        for (int i = 2; i <= limit; i++)
-            if (current % i == 0)
-            {
-                flag = 0;
-                break;
-            }
-        if (flag)
-            return current;
-        current += 2;
-    }
-}
+// static int next_simple(const int num)
+// {
+//     int flag;
+//     int limit, current = num + 1 + (num % 2);
+//     while (1)
+//     {
+//         flag = 1;
+//         limit = sqrt(current) + 1;
+//         for (int i = 2; i <= limit; i++)
+//             if (current % i == 0)
+//             {
+//                 flag = 0;
+//                 break;
+//             }
+//         if (flag)
+//             return current;
+//         current += 2;
+//     }
+// }
 
 // initialization of the hash-table (table and array of data also)
 // argument is the size of table*
@@ -90,7 +90,7 @@ int rebase(hash_t *table, const int new_base)
             elem = elem->next;
         }
     }
-    destruct(table);
+    destruct_table(table);
     table = new_table;
     return OK;
 }
@@ -100,9 +100,9 @@ int hash_function(const char *const key, const int base)
 {
     if (!key)
         return ARG_ERROR;
-    int sum = 0, i = 0;
-    while (key[i])
-        sum += key[i++] * (i + 1) * (i + 1);
+    int sum = 0, i = -1;
+    while (key[++i])
+        sum += key[i] * (i + 1) * (i + 1);
     return sum % base;
 }
 
@@ -181,7 +181,7 @@ int get(hash_t *const table, const char *const key)
     return GET_ERROR;
 }
 
-int remove(hash_t *const table, const char *const key)
+int remove_h(hash_t *const table, const char *const key)
 {
     if (!key || !table)
         return REMOVE_ERROR;
@@ -191,6 +191,15 @@ int remove(hash_t *const table, const char *const key)
     node_h *elem = table->data[pos];
     if (!elem)
         return REMOVE_ERROR;
+
+    if (!strcmp(elem->data, key))
+    {
+        elem = elem->next;
+        free(table->data[pos]->data);
+        free(table->data[pos]);
+        table->data[pos] = elem;
+        return OK;
+    }
     while (elem->next)
     {
         if (!strcmp(elem->next->data, key))

@@ -97,10 +97,10 @@ node_t *insert(node_t *p, const char *const value) // вставка ключа 
     if (!p)
         return create_node(value);
 
-    if (strcmp(p->value, value) < 0)
+    if (strcmp(p->value, value) > 0)
         p->left = insert(p->left, value);
 
-    else if (strcmp(p->value, value) > 0)
+    else if (strcmp(p->value, value) < 0)
         p->right = insert(p->right, value);
 
     return balance(p);
@@ -119,16 +119,16 @@ node_t *remove_min(node_t *p) // удаление узла с минимальн
     return balance(p);
 }
 
-node_t *remove(node_t *p, const char *const value) // удаление ключа value из дерева p
+node_t *remove_a(node_t *p, const char *const value) // удаление ключа value из дерева p
 {
     if (!p)
         return NULL;
 
-    if (strcmp(p->value, value) < 0)
-        p->left = remove(p->left, value);
+    if (strcmp(p->value, value) > 0)
+        p->left = remove_a(p->left, value);
 
-    else if (strcmp(p->value, value) > 0)
-        p->right = remove(p->right, value);
+    else if (strcmp(p->value, value) < 0)
+        p->right = remove_a(p->right, value);
 
     else //  k == p->key
     {
@@ -147,6 +147,8 @@ node_t *remove(node_t *p, const char *const value) // удаление ключ�
 
 void clean_atree(node_t *vertex)
 {
-    while (vertex = remove(vertex, vertex->value))
+    if (!vertex)
+        return;
+    while ((vertex = remove_a(vertex, vertex->value)))
         ;
 }

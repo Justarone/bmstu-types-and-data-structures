@@ -18,7 +18,7 @@ hash_t *init_table(const int base);
 int rebase(hash_t *table, const int new_base);
 int add(hash_t *const table, const char *const key);
 int get(hash_t *const table, const char *const key);
-int remove(hash_t *const table, const char *const key);
+int remove_h(hash_t *const table, const char *const key);
 void destruct_table(hash_t *table);
 
 #endif

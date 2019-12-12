@@ -1,5 +1,6 @@
 #include "trees.h"
 #include <stdlib.h>
+#include <string.h>
 
 node_t *insert_b(node_t *vertex, const char *const value)
 {
@@ -9,14 +10,14 @@ node_t *insert_b(node_t *vertex, const char *const value)
         return vertex;
     }
 
-    if (strcmp(vertex->value, value) < 0)
+    if (strcmp(vertex->value, value) > 0)
     {
         vertex->left = insert_b(vertex->left, value);
         fix_height(vertex);
         return vertex;
     }
 
-    if (strcmp(vertex->value, value) > 0)
+    if (strcmp(vertex->value, value) < 0)
     {
         vertex->right = insert_b(vertex->right, value);
         fix_height(vertex);
@@ -31,11 +32,11 @@ node_t *remove_b(node_t *vertex, const char *const value)
     if (!vertex)
         return NULL;
 
-    if (strcmp(vertex->value, value) < 0)
-        vertex->left = remove(vertex->left, value);
+    if (strcmp(vertex->value, value) > 0)
+        vertex->left = remove_b(vertex->left, value);
 
-    else if (strcmp(vertex->value, value) > 0)
-        vertex->right = remove(vertex->right, value);
+    else if (strcmp(vertex->value, value) < 0)
+        vertex->right = remove_b(vertex->right, value);
 
     else //  k == p->key
     {
@@ -50,4 +51,12 @@ node_t *remove_b(node_t *vertex, const char *const value)
         return min;
     }
     return vertex;
+}
+
+void clean_tree(node_t *vertex)
+{
+    if (!vertex)
+        return;
+    while ((vertex = remove_b(vertex, vertex->value)))
+        ;
 }
