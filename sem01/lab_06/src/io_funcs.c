@@ -24,6 +24,7 @@ void print_menu()
            "5. Show hash-table;\n"
            "6. Show comparison;\n"
            "7. Rebase;\n"
+           "8. Print average comparisons for structures;\n"
            "\nInput: ");
 }
 

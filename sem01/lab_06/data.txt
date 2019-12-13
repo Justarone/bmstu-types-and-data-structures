@@ -1,8 +1,6 @@
 Kononenko
-Nitenko             
-Yakuba
-Kovalev
-Minenko
+Nitenko                    
+Kovalev        
 Sokolov             
 Sverdlov
 Ivanov
@@ -16,11 +14,9 @@ Sheremetyeva
 Axenova
 Okunev
 Perestoronin
-Kolesnikov
-Zherdev         
+Kolesnikov                 
 Vasilevskiy
-Zaitsev
-Kucherov
+Zaitsev         
 Plotnikov
 Nazarov
 Romanov

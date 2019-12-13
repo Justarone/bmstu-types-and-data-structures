@@ -32,17 +32,13 @@ node_t *remove_b(node_t *vertex, const char *const value, stat_t *const stat)
     if (!vertex)
         return NULL;
 
+    stat->comp_num++;
+
     if (strcmp(vertex->value, value) > 0)
-    {
-        stat->comp_num++;
         vertex->left = remove_b(vertex->left, value, stat);
-    }
 
     else if (strcmp(vertex->value, value) < 0)
-    {
-        stat->comp_num++;
         vertex->right = remove_b(vertex->right, value, stat);
-    }
 
     else //  k == p->key
     {

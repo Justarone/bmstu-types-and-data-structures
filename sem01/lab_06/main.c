@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "additional_structs.h"
 #include "timer.h"
+#include "calculators.h"
 
 #define OK 0
 
@@ -43,7 +44,7 @@ int main()
             file_size++;
     }
 
-    table = init_table(next_simple(file_size));
+    table = init_table(next_simple(++file_size));
 
     print_menu();
     while (scanf("%d", &choice) != READED)
@@ -108,7 +109,10 @@ int main()
             if (err_code)
                 printf("No such word in structures\n");
             else
+            {
                 printf("Deletion is done.\n");
+                file_size--;
+            }
             break;
         case 3:
             print_tree(vertex_b, 0);
@@ -142,6 +146,13 @@ int main()
             int rc = rebase(&table, new_base);
             if (rc)
                 printf("Can't create table with new base (too much collisions)\n");
+            break;
+        case 8:
+            printf("Average comparison number:\n");
+            printf("File: %.1lf\n", (double)file_size / 2);
+            printf("Hash-table: %.1lf\n", count_cmp_hash(table));
+            printf("AUS-tree: %lf\n", count_cmp_tree(vertex));
+            printf("Tree: %lf\n", count_cmp_tree(vertex_b));
             break;
         default:
             printf("That's not right number, please, try again.\n");

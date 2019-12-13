@@ -13,7 +13,7 @@
 #define REBASE_ERROR 5
 #define ALREADY_EXISTS 17
 
-#define COLLISION_MAX 4
+#define COLLISION_MAX 3
 
 // this function find the least number which is simple but bigger than num
 int next_simple(const int num)
