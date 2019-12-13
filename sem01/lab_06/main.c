@@ -25,6 +25,7 @@ int main()
 {
     FILE *f;
     int choice;
+    int new_base = 0;
     int err_code = 1;
     stat_t stat_array[4] = {};
     uint64_t start = 0;
@@ -115,6 +116,23 @@ int main()
                        " (or there was no deletion still)\n");
             else
                 print_stat(stat_array);
+            break;
+        case 7:
+            printf("Input new base of table: ");
+            if (scanf("%d", &new_base) != READED)
+            {
+                printf("Can't read base value\n");
+                break;
+            }
+            if (new_base <= 0)
+            {
+                printf("Wrong value of base\n");
+                break;
+            }
+
+            int rc = rebase(&table, new_base);
+            if (rc)
+                printf("Can't create table with new base (too much collisions)\n");
             break;
         default:
             printf("That's not right number, please, try again.\n");

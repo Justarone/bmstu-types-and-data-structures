@@ -21,6 +21,7 @@ void print_menu()
            "4. Show AUS-tree;\n"
            "5. Show hash-table;\n"
            "6. Show comparison;\n"
+           "7. Rebase;\n"
            "\nInput: ");
 }
 

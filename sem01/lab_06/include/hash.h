@@ -17,7 +17,7 @@ typedef struct hash_t
 } hash_t;
 
 hash_t *init_table(const int base);
-int rebase(hash_t *table, const int new_base);
+int rebase(hash_t **table, const int new_base);
 int add(hash_t *const table, const char *const key);
 int get(hash_t *const table, const char *const key);
 int remove_h(hash_t *const table, const char *const key, stat_t *const stat);

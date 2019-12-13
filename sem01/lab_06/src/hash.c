@@ -13,7 +13,7 @@
 #define REBASE_ERROR 5
 #define ALREADY_EXISTS 17
 
-#define COLLISION_MAX 3
+#define COLLISION_MAX 1000
 
 // this function find the least number which is simple but bigger than num
 // static int next_simple(const int num)
@@ -71,16 +71,16 @@ void destruct_table(hash_t *table)
 
 // rebase - creates new table with base = new_base and recounts every element's
 // hash value
-int rebase(hash_t *table, const int new_base)
+int rebase(hash_t **table, const int new_base)
 {
     hash_t *new_table = init_table(new_base);
     if (!new_table)
         return ALLOCATION_ERROR;
 
     node_h *elem;
-    for (int i = 0; i < table->base; i++)
+    for (int i = 0; i < (*table)->base; i++)
     {
-        elem = table->data[i];
+        elem = (*table)->data[i];
         while (elem)
         {
             if (add(new_table, elem->data))
@@ -91,8 +91,8 @@ int rebase(hash_t *table, const int new_base)
             elem = elem->next;
         }
     }
-    destruct_table(table);
-    table = new_table;
+    destruct_table(*table);
+    *table = new_table;
     return OK;
 }
 
@@ -111,7 +111,7 @@ int hash_function(const char *const key, const int base)
 // argument)
 node_h *create_node_h(const char *const key)
 {
-    node_h *tmp = (node_h *)malloc(sizeof(node_h));
+    node_h *tmp = (node_h *)calloc(1, sizeof(node_h));
     if (!tmp)
         return NULL;
     tmp->data = (char *)malloc((strlen(key) + 1) * sizeof(char));
