@@ -9,6 +9,8 @@
 #define HASH_TABLE 2
 #define FILE_LIST 3
 
+#define ADD_ERROR 1
+
 char buffer[BUFF_LEN] = {0};
 
 void print_menu()
@@ -26,10 +28,15 @@ void print_menu()
 }
 
 // ввод хэш таблицы
-int input_hash_table(hash_t *const table, FILE *const stream)
+int input_hash_table(hash_t **const table, FILE *const stream)
 {
     while (fscanf(stream, "%s", buffer) == READED)
-        add(table, buffer);
+        if (add(*table, buffer) == ADD_ERROR)
+        {
+            int cur_base = next_simple((*table)->base);
+            while (rebase(table, cur_base))
+                cur_base = next_simple(cur_base);
+        };
     return OK;
 }
 

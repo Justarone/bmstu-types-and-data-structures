@@ -13,28 +13,28 @@
 #define REBASE_ERROR 5
 #define ALREADY_EXISTS 17
 
-#define COLLISION_MAX 1000
+#define COLLISION_MAX 4
 
 // this function find the least number which is simple but bigger than num
-// static int next_simple(const int num)
-// {
-//     int flag;
-//     int limit, current = num + 1 + (num % 2);
-//     while (1)
-//     {
-//         flag = 1;
-//         limit = sqrt(current) + 1;
-//         for (int i = 2; i <= limit; i++)
-//             if (current % i == 0)
-//             {
-//                 flag = 0;
-//                 break;
-//             }
-//         if (flag)
-//             return current;
-//         current += 2;
-//     }
-// }
+int next_simple(const int num)
+{
+    int flag;
+    int limit, current = num + 1 + (num % 2);
+    while (1)
+    {
+        flag = 1;
+        limit = sqrt(current) + 1;
+        for (int i = 2; i <= limit; i++)
+            if (current % i == 0)
+            {
+                flag = 0;
+                break;
+            }
+        if (flag)
+            return current;
+        current += 2;
+    }
+}
 
 // initialization of the hash-table (table and array of data also)
 // argument is the size of table*

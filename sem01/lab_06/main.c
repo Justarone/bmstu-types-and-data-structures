@@ -16,7 +16,6 @@
 
 #define FILENAME "data.txt"
 #define READED 1
-#define BASE 10
 #define BUFF_LEN 255
 
 extern char buffer[BUFF_LEN];
@@ -34,7 +33,17 @@ int main()
     node_t *vertex_b = NULL;
     node_t *vertex = NULL;
 
-    table = init_table(BASE);
+    // count size of file
+    int file_size = 0;
+    char c;
+    f = fopen(FILENAME, "r");
+    while ((c = fgetc(f)) != EOF && c != '\0')
+    {
+        if (c == '\n')
+            file_size++;
+    }
+
+    table = init_table(next_simple(file_size));
 
     print_menu();
     while (scanf("%d", &choice) != READED)
@@ -60,7 +69,7 @@ int main()
                 printf("Error, while opening file. Sorry.\n");
                 break;
             }
-            input_hash_table(table, f);
+            input_hash_table(&table, f);
             fseek(f, 0, SEEK_SET);
             input_tree(&vertex_b, f);
             tree_to_atree(vertex_b, &vertex);

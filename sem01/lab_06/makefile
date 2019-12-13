@@ -8,7 +8,7 @@ CC = gcc
 all: app.exe
 
 app.exe: $(OBJ)
-	$(CC) -o $@ -I $(HDRS_DIR) $(CFLAGS) $^
+	$(CC) -o $@ -I $(HDRS_DIR) $(CFLAGS) $^ -lm
 
 %.o: %.c
 	$(CC) -c -o $@ -I $(HDRS_DIR) $(CFLAGS) $< -MD

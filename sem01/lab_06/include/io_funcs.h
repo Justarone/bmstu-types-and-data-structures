@@ -7,7 +7,7 @@
 #include "additional_structs.h"
 
 void print_menu();
-int input_hash_table(hash_t *const table, FILE *const stream);
+int input_hash_table(hash_t **const table, FILE *const stream);
 int input_tree(node_t **vertex_b, FILE *const stream);
 void tree_to_atree(node_t *vertex_b, node_t **vertex);
 void print_hash_table(const hash_t *const table);
