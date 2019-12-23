@@ -65,6 +65,12 @@ int main()
     }
 
     node_t **new_adj_list = NULL;
+    if (!mb_sols)
+    {
+        printf("Граф уже дерево.\n");
+        goto adj_list_free;
+    }
+
     for (int i = 0; i < mb_sols_size; i++)
     {
         avoid_cpy(&new_adj_list, adj_list, size, mb_sols[i]);
@@ -79,7 +85,6 @@ int main()
         if (start == -1)
             printf("Ошибка, связанная со списками смежности (для вершины %d).\n",
                    mb_sols[i]);
-
         else
         {
             if (simple_dgs(new_adj_list, size, start, mb_sols[i]))
@@ -114,7 +119,8 @@ int main()
             free(tmp);
         }
     }
-    free(adj_list);
     free(mb_sols);
+adj_list_free:
+    free(adj_list);
     return OK;
 }

@@ -16,14 +16,12 @@ typedef uint64_t mtype;
 // adj_list - list with edges (for every vertex there is vertexes,
 // which are connected to it)
 // back_edges - array with pairs of vertexes, which are back edge
-int dgs(const node_t **const adj_list, const int size,
+int dgs(node_t **adj_list, const int size,
         ntype **mb_sols, int *const mb_sols_size, const ntype start)
 {
     // additional variables
     ntype current = 0;
     node_t *elem;
-    ntype *pair;
-    ntype prev;
     // init stack
     node_t *stack = NULL;
 
@@ -106,14 +104,16 @@ int dgs(const node_t **const adj_list, const int size,
         else if (cycle_index[i] == max_index)
             count++;
     }
+    if (max_index > 0)
+    {
+        *mb_sols_size = count;
+        *mb_sols = (int *)calloc(size, sizeof(int));
 
-    *mb_sols_size = count;
-    *mb_sols = (int *)calloc(size, sizeof(int));
-
-    int j = 0;
-    for (int i = 0; i < size; i++)
-        if (cycle_index[i] == max_index)
-            (*mb_sols)[j++] = i;
+        int j = 0;
+        for (int i = 0; i < size; i++)
+            if (cycle_index[i] == max_index)
+                (*mb_sols)[j++] = i;
+    }
 
     free(checked);
     free(route);
@@ -121,7 +121,7 @@ int dgs(const node_t **const adj_list, const int size,
     return OK;
 }
 
-void dig(const node_t **adj_list, int *const checked, const int number, const int prev)
+void dig(node_t **adj_list, int *const checked, const int number, const int prev)
 {
     if (checked[number])
         return;
@@ -136,7 +136,7 @@ void dig(const node_t **adj_list, int *const checked, const int number, const in
     }
 }
 
-int simple_dgs(const node_t **adj_list, const int size, const ntype start, const int avnum)
+int simple_dgs(node_t **adj_list, const int size, const ntype start, const int avnum)
 {
     int *checked = (int *)calloc(size, sizeof(int));
     dig(adj_list, checked, start, -1);
