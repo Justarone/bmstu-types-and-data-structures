@@ -4,6 +4,6 @@
 #include "struct.h"
 
 node_t *push(const node_t *const head, const ntype value);
-ntype pop(node_t *head);
+ntype pop(node_t **head);
 
 #endif
