@@ -87,10 +87,11 @@ int main()
                    mb_sols[i]);
         else
         {
-            if (simple_dgs(new_adj_list, size, start, mb_sols[i]))
-                printf("Плохой вариант... (%d)\n",
-                       mb_sols[i]);
-            else
+            // if (simple_dgs(new_adj_list, size, start, mb_sols[i]))
+            //     printf("Плохой вариант... (%d)\n",
+            //            mb_sols[i]);
+            // else
+            if (!simple_dgs(new_adj_list, size, start, mb_sols[i]))
                 printf("Можете убрать вершину #%d и получите дерево\n", mb_sols[i]);
         }
 
